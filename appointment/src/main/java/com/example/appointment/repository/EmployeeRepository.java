@@ -1,4 +1,11 @@
 package com.example.appointment.repository;
 
-public interface EmployeeRepository {
+import com.example.appointment.model.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
+
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 }
