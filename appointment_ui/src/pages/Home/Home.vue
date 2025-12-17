@@ -3,13 +3,16 @@ import { Button } from '@/components/ui/button'
 
 // Import the SVG so Vite resolves it correctly
 import CapitecLogo from '@/components/icons/CapitecLogo.vue'
+import UserAvatar from '@/components/UserAvatar.vue'
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-center min-h-screen gap-6">
     <!-- Logo -->
     <CapitecLogo size="sm" />
+<UserAvatar />
 
+ 
     <h1 class="text-4xl font-bold text-center">
       Appointment Booking System
     </h1>
