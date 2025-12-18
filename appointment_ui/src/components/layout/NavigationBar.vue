@@ -5,7 +5,7 @@ import UserAvatar from '@/components/auth/UserAvatar.vue'
 
 <template>
   <header
-    class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-6 py-4"
+    class="fixed top-0 z-50 w-full bg-background/95 backdrop-blur px-6 py-4"
   >
     <div
       class="mx-auto flex max-w-full items-center justify-between"

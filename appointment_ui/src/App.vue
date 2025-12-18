@@ -3,9 +3,12 @@ import NavBar from '@/components/layout/NavigationBar.vue'
 </script>
 
 <template>
-  <div class="min-h-screen bg-background">
+  <div class="bg-background">
     <NavBar />
-    <!-- Page content -->
+
+    <!-- Push content below fixed navbar -->
+    <main class="pt-16">
       <router-view />
+    </main>
   </div>
 </template>
