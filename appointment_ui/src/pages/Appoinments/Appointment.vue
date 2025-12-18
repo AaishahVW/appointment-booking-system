@@ -1,10 +1,9 @@
+<!-- src/pages/Appointments.vue -->
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import BranchSelector from '@/components/appointments/BranchSelector.vue'
-import AppointmentDatePicker from '@/components/appointments/AppointmentDatePicker.vue'
+import AppointmentCard from '@/components/appointments/AppointmentCard.vue'
 import AppointmentTable from '@/components/appointments/AppointmentTable.vue'
-import AppointmentTimePicker from '@/components/appointments/AppointmentTimePicker.vue'
 
 const selectedBranchId = ref<string | null>(null)
 const selectedDate = ref<Date | null>(null)
@@ -12,30 +11,19 @@ const selectedTime = ref<string | null>(null)
 </script>
 
 <template>
-  <div>
-    <h1 class="text-3xl font-semibold">
+  <div class="min-h-screen bg-background pt-6 pb-12 space-y-10">
+    <h1 class="text-3xl font-semibold text-center">
       Book an Appointment
     </h1>
 
-    <!-- Branch selection -->
-    <BranchSelector
-      @branch-selected="selectedBranchId = $event"
-    />
-
-    <!-- Date + time -->
-    <AppointmentDatePicker
-      v-if="selectedBranchId"
-      :branchId="selectedBranchId"
-      @date-selected="selectedDate = $event"
-      @time-selected="selectedTime = $event"
-    />
-
-<AppointmentTimePicker
-  :times="['09:00', '10:00', '11:00', '14:00', '15:00']"
-  v-model="selectedTime"
+    <!-- Card Layout -->
+    <AppointmentCard
+  :selectedBranchId="selectedBranchId"
+  :selectedDate="selectedDate"
+  :model-value-time="selectedTime"
+  @branch-selected="selectedBranchId = $event"
+  @date-selected="selectedDate = $event"
+  @update:modelValueTime="selectedTime = $event"
 />
-
-    <!-- User appointments -->
-    <AppointmentTable />
   </div>
 </template>
