@@ -4,8 +4,11 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar'
+import { useRouter } from 'vue-router'
 
-defineProps<{
+const router = useRouter()
+
+const props = defineProps<{
   isLoggedIn?: boolean
   firstName?: string
   lastName?: string
@@ -16,31 +19,44 @@ const initials = (firstName?: string, lastName?: string) => {
   if (!firstName || !lastName) return 'U'
   return `${firstName[0]}${lastName[0]}`.toUpperCase()
 }
+
+const goToLogin = () => {
+  router.push('/login')
+}
 </script>
 
 <template>
   <!-- Logged out state -->
-  <Avatar v-if="!isLoggedIn">
-    <AvatarImage src="https://github.com/shadcn.png" />
-    <AvatarFallback>U</AvatarFallback>
-  </Avatar>
+  <button
+    v-if="!props.isLoggedIn"
+    @click="goToLogin"
+    class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition"
+  >
+    <Avatar>
+      <AvatarImage src="https://github.com/shadcn.png" />
+      <AvatarFallback>U</AvatarFallback>
+    </Avatar>
+
+    <span class="text-sm text-muted-foreground">
+      Sign in
+    </span>
+  </button>
 
   <!-- Logged in state -->
   <div v-else class="flex items-center gap-3">
     <Avatar>
-        <AvatarImage src="https://github.com/shadcn.png" />
       <!-- Later add AvatarImage when profile photos exist -->
       <AvatarFallback>
-        {{ initials(firstName, lastName) }}
+        {{ initials(props.firstName, props.lastName) }}
       </AvatarFallback>
     </Avatar>
 
     <div class="flex flex-col leading-tight">
       <span class="text-sm font-medium text-foreground">
-        {{ firstName }} {{ lastName }}
+        {{ props.firstName }} {{ props.lastName }}
       </span>
       <span class="text-xs text-muted-foreground">
-        {{ referenceNumber }}
+        {{ props.referenceNumber }}
       </span>
     </div>
   </div>
