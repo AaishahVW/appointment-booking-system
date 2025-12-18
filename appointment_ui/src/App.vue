@@ -1,12 +1,14 @@
-<template>
-  <div class="min-h-screen bg-gray-50">
-    <router-view />
-  </div>
-</template>
-
 <script setup lang="ts">
+import NavBar from '@/components/layout/NavigationBar.vue'
 </script>
 
-<style>
-/* Optional global styling */
-</style>
+<template>
+  <div class="min-h-screen bg-background">
+    <NavBar />
+
+    <!-- Page content -->
+    <main class="mx-auto max-w-7xl px-6 py-8">
+      <router-view />
+    </main>
+  </div>
+</template>
