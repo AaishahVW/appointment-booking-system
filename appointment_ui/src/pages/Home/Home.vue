@@ -28,7 +28,7 @@ const goToAppointments = () => {
         all in one place.
       </p>
 
-      <Button size="lg" @click="goToAppointments">
+      <Button variant="filled" @click="goToAppointments">
         Book Appointment
       </Button>
     </div>
