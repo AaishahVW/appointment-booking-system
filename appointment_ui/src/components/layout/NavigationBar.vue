@@ -5,20 +5,17 @@ import UserAvatar from '@/components/auth/UserAvatar.vue'
 
 <template>
   <header
-    class="w-full border-b bg-background px-6 py-4"
+    class="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur px-6 py-4"
   >
     <div
-      class="mx-auto flex max-w-7xl items-center justify-between"
+      class="mx-auto flex max-w-full items-center justify-between"
     >
-      <!-- Left: Logo + Title -->
       <div class="flex items-center gap-4">
         <CapitecLogo size="sm" />
         <span class="text-md tracking-tight">
           Branch Appointment System
         </span>
       </div>
-
-      <!-- Right: User Avatar -->
       <UserAvatar />
     </div>
   </header>
