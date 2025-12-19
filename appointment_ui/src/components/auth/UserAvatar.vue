@@ -4,32 +4,29 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar'
-import { useRouter } from 'vue-router'
+import { ref } from 'vue'
+import Login from '@/components/auth/Login.vue'
 
-const router = useRouter()
+const showLogin = ref(false)
 
 const props = defineProps<{
   isLoggedIn?: boolean
   firstName?: string
   lastName?: string
-  referenceNumber?: string // CP or CE
+  referenceNumber?: string
 }>()
 
 const initials = (firstName?: string, lastName?: string) => {
   if (!firstName || !lastName) return 'U'
   return `${firstName[0]}${lastName[0]}`.toUpperCase()
 }
-
-const goToLogin = () => {
-  router.push('/login')
-}
 </script>
 
 <template>
-  <!-- Logged out state -->
+  <!-- Logged out -->
   <button
     v-if="!props.isLoggedIn"
-    @click="goToLogin"
+    @click="showLogin = true"
     class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition"
   >
     <Avatar>
@@ -42,17 +39,16 @@ const goToLogin = () => {
     </span>
   </button>
 
-  <!-- Logged in state -->
+  <!-- Logged in -->
   <div v-else class="flex items-center gap-3">
     <Avatar>
-      <!-- Later add AvatarImage when profile photos exist -->
       <AvatarFallback>
         {{ initials(props.firstName, props.lastName) }}
       </AvatarFallback>
     </Avatar>
 
     <div class="flex flex-col leading-tight">
-      <span class="text-sm font-medium text-foreground">
+      <span class="text-sm font-medium">
         {{ props.firstName }} {{ props.lastName }}
       </span>
       <span class="text-xs text-muted-foreground">
@@ -60,4 +56,7 @@ const goToLogin = () => {
       </span>
     </div>
   </div>
+
+  <!-- Login Modal -->
+  <Login v-model:open="showLogin" />
 </template>
