@@ -19,6 +19,7 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
+import  Signup  from '@/components/auth/Signup.vue'
 
 // 👇 controlled from parent
 const open = defineModel<boolean>('open')
@@ -31,13 +32,11 @@ const handleLogin = () => {
     username: username.value,
     password: password.value,
   })
+
+ 
   // TODO: authenticate
 }
-
-const handleSignup = () => {
-  open.value = false
-  // TODO: route to signup
-}
+ const showSignup = ref(false)
 </script>
 
 <template>
@@ -87,7 +86,7 @@ const handleSignup = () => {
             <Button
               variant="link"
               class="px-1"
-              @click="handleSignup"
+              @click="showSignup = true"
             >
               Sign up
             </Button>
@@ -96,4 +95,5 @@ const handleSignup = () => {
       </Card>
     </DialogContent>
   </Dialog>
+  <Signup v-model:open="showSignup" />
 </template>
