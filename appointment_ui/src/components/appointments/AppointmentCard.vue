@@ -3,6 +3,7 @@ import BranchSelector from './BranchSelector.vue'
 import AppointmentDatePicker from './AppointmentDatePicker.vue'
 import AppointmentTimePicker from './AppointmentTimePicker.vue'
 import AppointmentTable from './AppointmentTable.vue'
+import Button from '@/components/ui/button/Button.vue'
 
 defineProps<{
   selectedBranchId: string | null
@@ -28,7 +29,7 @@ const emits = defineEmits<{
         </div>
 
         <div class="flex flex-row gap-6">
-          <AppointmentDatePicker @date-selected="emits('date-selected', $event)" class="flex-[2]" />
+          <AppointmentDatePicker @date-selected="emits('date-selected', $event)" class="flex-2" />
           <AppointmentTimePicker
             :times="['09:00', '10:00', '11:00', '12:00', '14:00', '15:00', '16:00']"
             :model-value="modelValueTime"
@@ -36,6 +37,7 @@ const emits = defineEmits<{
             class="flex-1"
           />
         </div>
+        <div class="justify-centre"><Button>Confirm Booking</Button><Button>Reset</Button></div>
       </div>
 
       <!-- RIGHT CARD -->
