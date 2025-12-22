@@ -9,10 +9,12 @@ import Login from '@/components/auth/Login.vue'
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardContent,
   CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
 } from '@/components/ui/card'
-import Separator from '../ui/separator/Separator.vue'
+import { Separator } from '@/components/ui/separator'
 
 defineProps<{
   selectedBranchId: string | null
@@ -32,45 +34,53 @@ const showLogin = ref(false)
 <template>
   <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-
-      <Card class="flex flex-col gap-6">
+      <Card>
         <CardHeader>
-            <BranchSelector @branch-selected="emits('branch-selected', $event)" />
+          <CardTitle>Book an Appointment</CardTitle>
+          <CardDescription>
+            Choose a branch, date, and time to confirm your booking
+          </CardDescription>
         </CardHeader>
-      
+
         <CardContent>
-          <Separator class="my-5"/>
+          <BranchSelector @branch-selected="emits('branch-selected', $event)" />
+
+          <Separator class="my-4"/>
+
           <div class="flex gap-6">
             <AppointmentDatePicker
               @date-selected="emits('date-selected', $event)"
-              class="flex-2"
+              class="flex-1"
             />
-
             <AppointmentTimePicker
               :times="['09:00','10:00','11:00','12:00','14:00','15:00','16:00']"
               :model-value="modelValueTime"
               @update:model-value="$emit('update:modelValueTime', $event)"
               class="flex-1"
-            /> 
+            />
           </div>
-          <Separator class="my-5"/>
-          <div class="flex justify-center gap-4 pt-4">
-            <Button @click="showLogin = true">
-              Confirm Booking
-            </Button>
-            <Button variant="outline">
-              Reset
-            </Button>
+
+          <Separator class="my-4"/>
+
+          <div class="flex justify-center gap-4">
+            <Button @click="showLogin = true">Confirm Booking</Button>
+            <Button variant="outline">Reset</Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
-        <CardContent class="p-6">
+        <CardHeader>
+          <CardTitle>Your Appointments</CardTitle>
+          <CardDescription>
+            View your existing bookings
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
           <AppointmentTable />
         </CardContent>
       </Card>
-
     </div>
   </div>
 

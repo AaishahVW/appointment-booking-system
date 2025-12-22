@@ -8,12 +8,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Search } from 'lucide-vue-next'
 
 const emit = defineEmits<{
   (e: 'branch-selected', branchId: string): void
 }>()
 
-// TEMP mock (replace with API)
 const branches = ref([
   {
     id: '1',
@@ -42,32 +43,33 @@ const filteredBranches = computed(() =>
 
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-medium">Select a Branch</h2>
+    <Label>Select Branch</Label>
 
-    <Input
-      placeholder="Search branches..."
-      v-model="search"
-    />
+    <div class="relative">
+      <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Input
+        v-model="search"
+        placeholder="Search branches"
+        class="pl-9"
+      />
+    </div>
 
-    <Accordion type="single" collapsible>
+    <Accordion type="single" collapsible class="w-full">
       <AccordionItem
         v-for="branch in filteredBranches"
         :key="branch.id"
         :value="branch.id"
       >
-        <AccordionTrigger>
+        <AccordionTrigger class="text-sm font-medium">
           {{ branch.name }}
         </AccordionTrigger>
 
-        <AccordionContent class="space-y-2">
-          <p class="text-sm">{{ branch.address }}</p>
-          <p class="text-sm">📞 {{ branch.phone }}</p>
-          <p class="text-sm">✉ {{ branch.email }}</p>
+        <AccordionContent class="space-y-2 text-sm">
+          <p>{{ branch.address }}</p>
+          <p>{{ branch.phone }}</p>
+          <p>{{ branch.email }}</p>
 
-          <Button
-            size="sm"
-            @click="emit('branch-selected', branch.id)"
-          >
+          <Button size="sm" @click="emit('branch-selected', branch.id)">
             Select Branch
           </Button>
         </AccordionContent>

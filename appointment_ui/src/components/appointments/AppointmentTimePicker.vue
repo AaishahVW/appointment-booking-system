@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 
 defineProps<{
   times: string[]
@@ -16,26 +18,23 @@ const selectTime = (time: string) => {
 </script>
 
 <template>
-  <div class="flex flex-col w-full">
-    <h3 class="text-sm font-medium text-foreground mb-2">
-      Select Time
-    </h3>
+  <div class="flex w-full flex-col space-y-2">
+    <Label>Select Time</Label>
 
     <div class="grid gap-2">
-      <button
+      <Button
         v-for="time in times"
         :key="time"
+        variant="outline"
+        size="md"
         @click="selectTime(time)"
         :class="cn(
-          'px-4 py-2 border rounded-md text-sm transition-all',
-          modelValue === time
-            ? 'bg-(--color-selected) text-(--color-on-selected) border-(--color-selected)'
-            : 'bg-(--color-background) border-(--color-outline) text-foreground hover:bg-gray-100 dark:hover:bg-gray-700'
+          'rounded-md py-2',
+          modelValue === time && 'bg-primary/20 text-primary border-primary'
         )"
       >
         {{ time }}
-      </button>
+      </Button>
     </div>
   </div>
 </template>
-

@@ -2,10 +2,12 @@
 import type { DateValue } from '@internationalized/date'
 import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
 import { Calendar } from '@/components/ui/calendar'
+import { Label } from '@/components/ui/label'
 import { ref, type Ref } from 'vue'
 
 const defaultPlaceholder = today(getLocalTimeZone())
-const date = ref() as Ref<DateValue>
+// ✅ initialize date with today
+const date = ref(defaultPlaceholder) as Ref<DateValue>
 
 const df = new DateFormatter('en-US', { dateStyle: 'long' })
 
@@ -14,33 +16,27 @@ const emit = defineEmits<{
 }>()
 
 const onSelectDate = (d: DateValue | undefined) => {
-  if (!d) return // ignore undefined
+  if (!d) return
   date.value = d
   emit('date-selected', d.toDate(getLocalTimeZone()))
 }
 </script>
 
 <template>
-  <div class="max-w-fit">
-    <h3 class="text-sm font-medium text-foreground mb-2">
-      Select Date
-    </h3>
+  <div class="max-w-fit space-y-2">
+    <Label>Select Date</Label>
 
-    <div class="px-2 py-2 border border-(--color-outline) rounded-md bg-(--color-background) text-sm">
-      {{ date ? df.format(date.toDate(getLocalTimeZone())) : 'Pick a date' }}
-    </div>
-<Calendar
+    <Label class="rounded-md border px-3 py-2 text-sm">
+      {{ df.format(date.toDate(getLocalTimeZone())) }}
+    </Label>
+
+    <Calendar
       v-model="date"
       :default-placeholder="defaultPlaceholder"
       layout="month-and-year"
       initial-focus
       @update:model-value="onSelectDate"
-      class="
-    [&_button]:w-15
-    [&_th]:text-center
-  "
+      class=" [&_button]:w-15 [&_th]:text-center"
     />
-    
   </div>
 </template>
-

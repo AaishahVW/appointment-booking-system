@@ -7,8 +7,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Label } from '@/components/ui/label'
 
-// TEMP mock
 const appointments = [
   {
     id: 1,
@@ -22,9 +22,7 @@ const appointments = [
 
 <template>
   <div class="space-y-4">
-    <h2 class="text-xl font-medium">
-      Your Appointments
-    </h2>
+    <Label>Your Appointments</Label>
 
     <Table>
       <TableHeader>
