@@ -51,9 +51,9 @@ const showLogin = ref(false)
               :model-value="modelValueTime"
               @update:model-value="$emit('update:modelValueTime', $event)"
               class="flex-1"
-            />
+            /> 
           </div>
-<Separator class="my-5"/>
+          <Separator class="my-5"/>
           <div class="flex justify-center gap-4 pt-4">
             <Button @click="showLogin = true">
               Confirm Booking
