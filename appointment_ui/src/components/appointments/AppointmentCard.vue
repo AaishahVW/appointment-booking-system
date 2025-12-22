@@ -1,11 +1,18 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import BranchSelector from './BranchSelector.vue'
 import AppointmentDatePicker from './AppointmentDatePicker.vue'
 import AppointmentTimePicker from './AppointmentTimePicker.vue'
 import AppointmentTable from './AppointmentTable.vue'
-import Button from '@/components/ui/button/Button.vue'
 import Login from '@/components/auth/Login.vue'
-import { ref } from 'vue'
+
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from '@/components/ui/card'
+import Separator from '../ui/separator/Separator.vue'
 
 defineProps<{
   selectedBranchId: string | null
@@ -26,43 +33,46 @@ const showLogin = ref(false)
   <div class="max-w-7xl mx-auto px-4 py-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
-      <!-- LEFT CARD -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 flex flex-col gap-6">
-        <div class="max-h-96 overflow-y-auto">
-          <BranchSelector @branch-selected="emits('branch-selected', $event)" />
-        </div>
+      <Card class="flex flex-col gap-6">
+        <CardHeader>
+            <BranchSelector @branch-selected="emits('branch-selected', $event)" />
+        </CardHeader>
+      
+        <CardContent>
+          <Separator class="my-5"/>
+          <div class="flex gap-6">
+            <AppointmentDatePicker
+              @date-selected="emits('date-selected', $event)"
+              class="flex-2"
+            />
 
-        <div class="flex gap-6">
-          <AppointmentDatePicker
-            @date-selected="emits('date-selected', $event)"
-            class="flex-2"
-          />
+            <AppointmentTimePicker
+              :times="['09:00','10:00','11:00','12:00','14:00','15:00','16:00']"
+              :model-value="modelValueTime"
+              @update:model-value="$emit('update:modelValueTime', $event)"
+              class="flex-1"
+            />
+          </div>
+<Separator class="my-5"/>
+          <div class="flex justify-center gap-4 pt-4">
+            <Button @click="showLogin = true">
+              Confirm Booking
+            </Button>
+            <Button variant="outline">
+              Reset
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-          <AppointmentTimePicker
-            :times="['09:00','10:00','11:00','12:00','14:00','15:00','16:00']"
-            :model-value="modelValueTime"
-            @update:model-value="$emit('update:modelValueTime', $event)"
-            class="flex-1"
-          />
-        </div>
-
-        <div class="flex justify-center gap-4 pt-4">
-          <Button @click="showLogin = true">
-            Confirm Booking
-          </Button>
-          <Button variant="outline">Reset</Button>
-        </div>
-      </div>
-
-      <!-- RIGHT CARD -->
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-        <AppointmentTable />
-      </div>
+      <Card>
+        <CardContent class="p-6">
+          <AppointmentTable />
+        </CardContent>
+      </Card>
 
     </div>
   </div>
 
-  <!-- ✅ Move Login outside card -->
   <Login v-model:open="showLogin" />
 </template>
-
