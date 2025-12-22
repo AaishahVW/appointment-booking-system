@@ -1,0 +1,33 @@
+<script setup lang="ts">
+import { ref } from 'vue'
+import AppointmentCard from '@/components/appointments/AppointmentCard.vue'
+
+const selectedBranchId = ref<string | null>(null)
+const selectedDate = ref<Date | null>(null)
+const selectedTime = ref<string | null>(null)
+</script>
+
+<template>
+  <section class="relative w-full min-h-screen overflow-auto">
+    <div
+      class="fixed inset-0 bg-cover bg-center z-0"
+      style="background-image: url('/src/assets/images/branchone.jpg');"
+    ></div>
+
+    <div class="fixed inset-0 bg-black/70 z-10"></div>
+
+    <div class="relative z-20 flex flex-col items-center pt-20 px-4">
+
+      <div class="w-full">
+        <AppointmentCard
+          :selectedBranchId="selectedBranchId"
+          :selectedDate="selectedDate"
+          :model-value-time="selectedTime"
+          @branch-selected="selectedBranchId = $event"
+          @date-selected="selectedDate = $event"
+          @update:modelValueTime="selectedTime = $event"
+        />
+      </div>
+    </div>
+  </section>
+</template>
