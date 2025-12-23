@@ -11,26 +11,23 @@ const goToAppointments = () => {
 
 <template>
   <section
-    class="relative w-full overflow-hidden
-           flex items-center justify-center
-           bg-cover bg-center"
-    style="
-      height: calc(100vh - 4rem);
-      background-image: url('/src/assets/images/branchthree.jpg');
+    class="
+      fixed w-full
+      flex items-center justify-center
+      min-h-screen
+      bg-[url('/src/assets/images/branchthree.jpg')]
+      bg-cover bg-center
     "
   >
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-black/70" />
+    <div class="absolute inset-0 bg-overlay" />
 
-    <!-- Content -->
-    <div class="relative z-10 max-w-3xl text-center px-6">
-      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+    <div class="relative z-10 max-w-3xl px-6 text-center">
+      <h1 class="mb-4 text-4xl font-bold text-surface md:text-5xl">
         Welcome to Capitec’s Appointment Booking System
       </h1>
 
-      <p class="text-lg md:text-xl text-white/90 mb-8">
-        Book, manage, and track your appointments quickly and securely —
-        all in one place.
+      <p class="mb-8 text-lg text-surface/90 md:text-xl">
+        Book, manage, and track your appointments quickly and securely all in one place.
       </p>
 
       <Button @click="goToAppointments">
