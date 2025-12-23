@@ -1,10 +1,20 @@
-import axios from 'axios';
+const API_BASE = import.meta.env.VITE_API_URL;
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+export async function api<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    ...options,
+  });
 
-export const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
