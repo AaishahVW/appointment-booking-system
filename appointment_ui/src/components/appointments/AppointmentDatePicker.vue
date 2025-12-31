@@ -24,7 +24,7 @@ const onSelectDate = (d: DateValue | undefined) => {
 
 <template>
   <div class="max-w-fit space-y-2">
-    <Label>Select Date</Label>
+    <Label class="py-3">Select Date</Label>
 
     <Label class="rounded-md border px-3 py-2 text-sm">
       {{ df.format(date.toDate(getLocalTimeZone())) }}

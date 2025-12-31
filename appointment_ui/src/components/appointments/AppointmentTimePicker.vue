@@ -19,7 +19,7 @@ const selectTime = (time: string) => {
 
 <template>
   <div class="flex w-full flex-col space-y-2">
-    <Label>Select Time</Label>
+    <Label class="py-3">Select Time</Label>
 
     <div class="grid gap-2">
       <Button

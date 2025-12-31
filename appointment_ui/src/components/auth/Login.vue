@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-
-// shadcn-vue components
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Dialog,
-  DialogContent,
-  DialogOverlay,
-} from '@/components/ui/dialog'
 import {
   Card,
   CardHeader,
@@ -19,10 +12,7 @@ import {
   CardFooter,
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import  Signup  from '@/components/auth/Signup.vue'
 
-// 👇 controlled from parent
-const open = defineModel<boolean>('open')
 
 const username = ref('')
 const password = ref('')
@@ -32,18 +22,10 @@ const handleLogin = () => {
     username: username.value,
     password: password.value,
   })
-
- 
-  // TODO: authenticate
 }
- const showSignup = ref(false)
 </script>
 
 <template>
-  <Dialog v-model:open="open">
-    <DialogOverlay class="fixed inset-0 bg-black/40 backdrop-blur-sm" />
-
-    <DialogContent class="sm:max-w-md">
       <Card class="border-none shadow-none">
         <CardHeader>
           <CardTitle class="text-2xl">Welcome back</CardTitle>
@@ -81,19 +63,12 @@ const handleLogin = () => {
 
         <CardFooter class="flex flex-col gap-3">
           <Separator />
-          <p class="text-sm text-muted-foreground">
+          <p class="text-sm text-muted-foreground text-center">
             Don’t have an account?
-            <Button
-              variant="link"
-              class="px-1"
-              @click="showSignup = true"
-            >
-              Sign up
-            </Button>
+            <Button variant="link" @click="$emit('signup')">
+      Sign up
+    </Button>
           </p>
         </CardFooter>
       </Card>
-    </DialogContent>
-  </Dialog>
-  <Signup v-model:open="showSignup" />
 </template>

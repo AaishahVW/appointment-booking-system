@@ -1,37 +1,38 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import AppointmentCard from '@/components/appointments/AppointmentCard.vue'
+import AppointmentTable from '@/components/appointments/AppointmentTable.vue'
 
 const selectedBranchId = ref<string | null>(null)
 const selectedDate = ref<Date | null>(null)
 const selectedTime = ref<string | null>(null)
+
+const isLoggedIn = ref(false)
 </script>
 
 <template>
-  <section class="relative w-full min-h-screen overflow-auto">
-    <div
-      class="fixed inset-0 bg-cover bg-center z-0"
-      style="background-image: url('/src/assets/images/branchone.jpg');"
-    ></div>
+  <section class="fixed inset-0">
+    <!-- Background -->
+    <div class="absolute inset-0 bg-[url('/src/assets/images/branchthree.jpg')] bg-cover bg-center" />
+    <div class="absolute inset-0 bg-black/70" />
 
-    <div class="fixed inset-0 bg-black/70 z-10"></div>
-
-    <div class="relative z-20 flex flex-col items-center pt-20 px-4">
-      <div class="text-center mb-6">
-        <h1 class="text-3xl text-white">
-          Book an Appointment
-        </h1>
-      </div>
-
-      <div class="w-full">
+    <!-- Content -->
+   <div class="relative z-10 flex h-full items-start justify-center px-4 pt-24">
+      <div class="flex w-full max-w-4xl flex-col gap-6">
+        <!-- Appointment Card -->
         <AppointmentCard
-          :selectedBranchId="selectedBranchId"
-          :selectedDate="selectedDate"
-          :model-value-time="selectedTime"
-          @branch-selected="selectedBranchId = $event"
-          @date-selected="selectedDate = $event"
-          @update:modelValueTime="selectedTime = $event"
-        />
+  :selectedBranchId="selectedBranchId"
+  :selectedDate="selectedDate"
+  :model-value-time="selectedTime"
+  @branch-selected="selectedBranchId = $event"
+  @date-selected="selectedDate = $event"
+  @update:modelValueTime="selectedTime = $event"
+  @login-required="$emit('login-required')"
+/>
+
+
+        <!-- Appointment Table (only when logged in) -->
+        <AppointmentTable v-if="isLoggedIn" />
       </div>
     </div>
   </section>

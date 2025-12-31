@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import NavBar from '@/components/layout/NavigationBar.vue'
+import AuthDialog from '@/components/auth/AuthDialog.vue'
+
+const authDialog = ref<InstanceType<typeof AuthDialog> | null>(null)
+
+const openLogin = () => authDialog.value?.openLogin()
 </script>
 
 <template>
-  <div class="bg-background">
-    <NavBar />
+  <NavBar @login="openLogin" />
 
-    <!-- Push content below fixed navbar -->
-    <main class="pt-16">
-      <router-view />
-    </main>
-  </div>
+  <main class="pt-16">
+    <router-view @login-required="openLogin" />
+  </main>
+
+  <AuthDialog ref="authDialog" />
 </template>
