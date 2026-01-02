@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/case-types")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class CaseTypeController {
 

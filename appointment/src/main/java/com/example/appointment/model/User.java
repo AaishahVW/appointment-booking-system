@@ -13,11 +13,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class User {
+
     @Id
-    @GeneratedValue
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String nationalId;
 
     @Column(nullable = false)
@@ -36,4 +37,11 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    void prePersist() {
+        if (userId == null) userId = UUID.randomUUID();
+        if (createdAt == null) createdAt = LocalDateTime.now();
+        if (updatedAt == null) updatedAt = LocalDateTime.now();
+    }
 }

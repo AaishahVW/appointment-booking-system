@@ -6,19 +6,19 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+} from "@/components/ui/table";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { ref, onMounted } from "vue";
+import { appointmentsApi } from "@/api/appointments.api";
+import { useAuthStore } from "@/stores/auth.store";
 
-const appointments = [
-  {
-    id: 1,
-    branch: 'Cape Town Branch',
-    date: '2025-01-12',
-    time: '10:30',
-    status: 'Confirmed',
-  },
-]
+const auth = useAuthStore();
+const appointments = ref<any[]>([]);
+
+onMounted(async () => {
+  if (!auth.clientId.value) return;
+  appointments.value = await appointmentsApi.getByClient(auth.clientId.value);
+});
 </script>
 
 <template>
@@ -40,9 +40,9 @@ const appointments = [
 
         <TableBody>
           <TableRow v-for="a in appointments" :key="a.id">
-            <TableCell>{{ a.branch }}</TableCell>
-            <TableCell>{{ a.date }}</TableCell>
-            <TableCell>{{ a.time }}</TableCell>
+            <TableCell>{{ a.branchName }}</TableCell>
+            <TableCell>{{ a.appointmentDate }}</TableCell>
+            <TableCell>{{ a.startTime }}</TableCell>
             <TableCell>{{ a.status }}</TableCell>
           </TableRow>
         </TableBody>

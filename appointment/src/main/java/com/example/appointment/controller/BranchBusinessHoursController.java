@@ -11,6 +11,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/business-hours")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
 public class BranchBusinessHoursController {
 

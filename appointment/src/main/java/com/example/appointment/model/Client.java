@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 public class Client {
     @Id
-    @GeneratedValue
+    @Column(name = "client_id", nullable = false, updatable = false)
     private UUID clientId;
 
     @OneToOne
@@ -25,4 +25,14 @@ public class Client {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    void prePersist() {
+        if (clientId == null) {
+            clientId = UUID.randomUUID();
+        }
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }
