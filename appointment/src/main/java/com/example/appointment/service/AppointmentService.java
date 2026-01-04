@@ -1,7 +1,10 @@
 package com.example.appointment.service;
 
+import com.example.appointment.dto.AppointmentDTO;
 import com.example.appointment.model.Appointment;
+import com.example.appointment.model.Branch;
 import com.example.appointment.repository.AppointmentRepository;
+import com.example.appointment.repository.BranchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +17,31 @@ import java.util.UUID;
 public class AppointmentService {
 
     private final AppointmentRepository repository;
+    private final BranchRepository branchRepository;
 
-    public Appointment create(Appointment appointment) {
-        LocalDateTime now = LocalDateTime.now();
-        appointment.setCreatedAt(now);
-        appointment.setUpdatedAt(now);
+    public Appointment create(AppointmentDTO dto) {
+
+        Branch branch = branchRepository.findById(dto.getBranchId())
+                .orElseThrow(() -> new RuntimeException("Branch not found"));
+
+        Appointment appointment = Appointment.builder()
+                .clientId(dto.getClientId())
+                .employeeId(dto.getEmployeeId())
+                .branch(branch) // ✅ REQUIRED
+                .productId(dto.getProductId())
+                .caseTypeId(dto.getCaseTypeId())
+                .appointmentDate(dto.getAppointmentDate())
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .status(dto.getStatus())
+                .notes(dto.getNotes())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
         return repository.save(appointment);
     }
+
 
     public Appointment getById(UUID id) {
         return repository.findById(id)

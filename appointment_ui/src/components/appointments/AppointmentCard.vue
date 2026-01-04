@@ -13,6 +13,15 @@ import { timeSlotsApi, type TimeSlot } from "@/api/timeSlots.api";
 import { appointmentsApi } from "@/api/appointments.api";
 import { useAuthStore } from "@/stores/auth.store";
 
+type PendingAppointmentPayload = {
+  employeeId: string
+  branchId: string
+  appointmentDate: string
+  startTime: string
+  endTime: string
+  status: "BOOKED"
+}
+
 const props = defineProps<{
   selectedBranchId: string | null;
   selectedDate: Date | null;
@@ -30,7 +39,8 @@ const auth = useAuthStore();
 const employees = ref<any[]>([]);
 const availableTimes = ref<TimeSlot[]>([]);
 const selectedEmployee = ref<string | null>(null);
-const pendingBooking = ref<null | (() => Promise<void>)>(null);
+const pendingPayload = ref<PendingAppointmentPayload | null>(null);
+
 
 // Fetch available times & employees when branch/date changes
 watch(
@@ -49,46 +59,69 @@ watch(
   }
 );
 
-// Confirm booking
 const confirmBooking = async () => {
-  if (!auth.clientId) {
-    pendingBooking.value = confirmBooking;
-    emit("login-required");
-    return;
-  }
-
-  if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime || !selectedEmployee.value) {
+  if (
+    !props.selectedBranchId ||
+    !props.selectedDate ||
+    !props.modelValueTime ||
+    !selectedEmployee.value
+  ) {
     alert("Please select branch, date, time, and employee");
     return;
   }
 
+  const payload: PendingAppointmentPayload = {
+    employeeId: selectedEmployee.value,
+    branchId: props.selectedBranchId,
+    appointmentDate: props.selectedDate.toISOString().slice(0, 10),
+    startTime: props.modelValueTime,
+    endTime: props.modelValueTime,
+    status: "BOOKED",
+  };
+
+  // 🔐 Not logged in → pause booking
+  if (!auth.isLoggedIn) {
+    pendingPayload.value = payload;
+    emit("login-required");
+    return;
+  }
+
+  // ✅ Logged in → submit immediately
   try {
     await appointmentsApi.create({
-      clientId: auth.clientId,
-      employeeId: selectedEmployee.value,
-      branchId: props.selectedBranchId,
-      appointmentDate: props.selectedDate.toISOString().slice(0, 10),
-      startTime: props.modelValueTime,
-      endTime: props.modelValueTime,
-      status: "BOOKED",
+      ...payload,
+      clientId: auth.clientId!, // ✅ safe here
     });
 
-    pendingBooking.value = null;
+    pendingPayload.value = null;
     alert("Appointment booked successfully!");
-  } catch (error: any) {
-    console.error(error);
-    alert("Failed to book appointment. Are you logged in?");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to book appointment");
   }
 };
 
-// Retry pending booking after login
+
 onMounted(() => {
   window.addEventListener("auth-success", async () => {
-    if (pendingBooking.value) {
-      await pendingBooking.value();
+    if (!pendingPayload.value || !auth.clientId) return;
+
+    try {
+      await appointmentsApi.create({
+        ...pendingPayload.value,
+        clientId: auth.clientId, // ✅ now guaranteed
+      });
+
+      pendingPayload.value = null;
+      alert("Appointment booked successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to book appointment after login");
     }
   });
 });
+
+
 </script>
 
 <template>

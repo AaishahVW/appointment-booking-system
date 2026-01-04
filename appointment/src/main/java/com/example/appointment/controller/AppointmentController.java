@@ -1,7 +1,9 @@
 package com.example.appointment.controller;
 
+import com.example.appointment.dto.AppointmentDTO;
 import com.example.appointment.model.Appointment;
 import com.example.appointment.service.AppointmentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,15 @@ public class AppointmentController {
     private final AppointmentService service;
 
     @PostMapping
-    public ResponseEntity<Appointment> create(@RequestBody Appointment appointment) {
-        return ResponseEntity.ok(service.create(appointment));
+    public ResponseEntity<Appointment> create(
+            @RequestBody AppointmentDTO dto,
+            HttpServletRequest request
+    ) {
+        UUID clientId = UUID.fromString((String) request.getAttribute("clientId"));
+        dto.setClientId(clientId);
+        return ResponseEntity.ok(service.create(dto));
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Appointment> getById(@PathVariable UUID id) {

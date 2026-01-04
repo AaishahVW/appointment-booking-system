@@ -6,10 +6,13 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
@@ -35,9 +38,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             Claims claims = jwtService.parse(token);
-            request.setAttribute("userId", claims.get("userId", String.class));
-            request.setAttribute("clientId", claims.get("clientId", String.class));
+
+            String userId = claims.getSubject();
+            String clientId = claims.get("clientId", String.class);
+
+            // ✅ THIS IS THE KEY PART
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            userId,        // principal
+                            null,          // credentials
+                            Collections.emptyList() // authorities (roles later)
+                    );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            // Optional (still useful for controllers)
+            request.setAttribute("clientId", clientId);
+
         } catch (Exception e) {
+            SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { watch } from "vue";
 import {
   Table,
   TableBody,
@@ -15,10 +16,22 @@ import { useAuthStore } from "@/stores/auth.store";
 const auth = useAuthStore();
 const appointments = ref<any[]>([]);
 
-onMounted(async () => {
+const loadAppointments = async () => {
   if (!auth.clientId) return;
-  appointments.value = await appointmentsApi.getByClient(auth.clientId);
-});
+
+  try {
+    appointments.value = await appointmentsApi.getByClient(auth.clientId);
+  } catch (err) {
+    console.error("Failed to load appointments", err);
+  }
+};
+
+onMounted(loadAppointments);
+
+watch(
+  () => auth.clientId,
+  () => loadAppointments()
+);
 </script>
 
 <template>
