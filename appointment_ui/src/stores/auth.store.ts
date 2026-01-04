@@ -4,11 +4,10 @@ import { http } from "@/api/http";
 
 export const useAuthStore = defineStore("auth", () => {
   const token = ref<string | null>(localStorage.getItem("token"));
+  const isLoggedIn = computed(() => !!token.value);
   const clientId = ref<string | null>(localStorage.getItem("clientId"));
   const firstName = ref<string | null>(localStorage.getItem("firstName"));
   const lastName = ref<string | null>(localStorage.getItem("lastName"));
-
-  const isLoggedIn = computed(() => !!token.value);
 
   async function login(username: string, password: string) {
     try {
@@ -72,6 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
     localStorage.removeItem("clientId");
     localStorage.removeItem("firstName");
     localStorage.removeItem("lastName");
+    location.reload();
   }
 
   return {

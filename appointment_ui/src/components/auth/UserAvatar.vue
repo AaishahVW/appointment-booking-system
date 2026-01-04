@@ -1,42 +1,52 @@
 <script setup lang="ts">
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useAuthStore } from '@/stores/auth.store'
+
+const auth = useAuthStore()
 
 defineEmits<{
   (e: 'login'): void
 }>()
 
-const props = defineProps<{
-  isLoggedIn?: boolean
-  firstName?: string
-  lastName?: string
-  referenceNumber?: string
-}>()
-
-const initials = (firstName?: string, lastName?: string) =>
+// Accept null since auth.firstName/lastName can be null
+const initials = (firstName: string | null, lastName: string | null) =>
   firstName && lastName ? `${firstName[0]}${lastName[0]}`.toUpperCase() : 'U'
+
+const handleLogout = () => {
+  auth.logout() // clears token and reloads page
+}
 </script>
 
 <template>
-  <button
-    v-if="!props.isLoggedIn"
-    @click="$emit('login')"
-    class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50"
-  >
-    <Avatar>
-      <AvatarImage src="https://github.com/shadcn.png" />
-      <AvatarFallback>U</AvatarFallback>
-    </Avatar>
+  <div>
+    <!-- Not logged in -->
+    <button
+      v-if="!auth.isLoggedIn"
+      @click="$emit('login')"
+      class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50"
+    >
+      <Avatar>
+        <AvatarImage src="https://github.com/shadcn.png" />
+        <AvatarFallback>U</AvatarFallback>
+      </Avatar>
+      <span class="text-sm text-muted-foreground">Sign in</span>
+    </button>
 
-    <span class="text-sm text-muted-foreground">Sign in</span>
-  </button>
+    <!-- Logged in -->
+    <DropdownMenu v-else>
+      <DropdownMenuTrigger asChild>
+        <button class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition">
+          <Avatar>
+            <AvatarFallback>{{ initials(auth.firstName, auth.lastName) }}</AvatarFallback>
+          </Avatar>
+          <span class="text-sm font-medium">{{ auth.firstName }} {{ auth.lastName }}</span>
+        </button>
+      </DropdownMenuTrigger>
 
-  <div v-else class="flex items-center gap-3">
-    <Avatar>
-      <AvatarFallback>{{ initials(props.firstName, props.lastName) }}</AvatarFallback>
-    </Avatar>
-    <div class="flex flex-col leading-tight">
-      <span class="text-sm font-medium">{{ props.firstName }} {{ props.lastName }}</span>
-      <span class="text-xs text-muted-foreground">{{ props.referenceNumber }}</span>
-    </div>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem @click="handleLogout">Logout</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   </div>
 </template>

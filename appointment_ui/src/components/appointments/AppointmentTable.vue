@@ -16,8 +16,8 @@ const auth = useAuthStore();
 const appointments = ref<any[]>([]);
 
 onMounted(async () => {
-  if (!auth.clientId.value) return;
-  appointments.value = await appointmentsApi.getByClient(auth.clientId.value);
+  if (!auth.clientId) return;
+  appointments.value = await appointmentsApi.getByClient(auth.clientId);
 });
 </script>
 

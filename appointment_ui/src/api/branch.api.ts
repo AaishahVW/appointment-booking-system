@@ -13,7 +13,8 @@ export interface Branch {
 }
 
 export const branchesApi = {
-  getAll() {
-    return http.get<Branch[]>("/branches").then((res) => res.data);
+  getAll: async (): Promise<Branch[]> => {
+    const res = await http.get("/branches"); // token automatically attached
+    return res.data;
   },
 };

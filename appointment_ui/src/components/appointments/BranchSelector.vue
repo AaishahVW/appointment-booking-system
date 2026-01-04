@@ -6,22 +6,42 @@ import { Button } from "@/components/ui/button";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Search } from "lucide-vue-next";
 import { branchesApi, type Branch } from "@/api/branch.api";
+import { useAuthStore } from "@/stores/auth.store";
 
 const emit = defineEmits<{ (e: "branch-selected", branchId: string): void }>();
 
 const branches = ref<Branch[]>([]);
 const search = ref("");
+const auth = useAuthStore();
 
 // Fetch branches from backend
-onMounted(async () => {
-  branches.value = await branchesApi.getAll();
-});
+const loadBranches = async () => {
+  try {
+    branches.value = await branchesApi.getAll();
+  } catch (err: any) {
+    if (err.response?.status === 401) {
+      window.dispatchEvent(new Event("login-required"));
+    } else {
+      console.error(err);
+      alert("Failed to load branches");
+    }
+  }
+};
+
 
 const filteredBranches = computed(() =>
   branches.value.filter((b) =>
     b.branchName.toLowerCase().includes(search.value.toLowerCase())
   )
 );
+onMounted(() => {
+  if (auth.isLoggedIn) {
+    loadBranches();
+  } else {
+    // Optionally wait for login
+    window.addEventListener("auth-success", loadBranches, { once: true });
+  }
+});
 </script>
 
 <template>
