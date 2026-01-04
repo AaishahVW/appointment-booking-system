@@ -5,14 +5,17 @@ export const useAuthStore = () => {
   const clientId = ref<string | null>(null);
   const firstName = ref<string | null>(null);
   const lastName = ref<string | null>(null);
+  const token = ref<string | null>(null);
 
   const login = async (username: string, password: string) => {
     try {
       const res = await http.post("/auth/login", { username, password });
-      // backend should return clientId, firstName, lastName
+
+      token.value = res.data.token;
       clientId.value = res.data.clientId;
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
+
       return true;
     } catch (err) {
       console.error("Login failed", err);
@@ -30,9 +33,12 @@ export const useAuthStore = () => {
   }) => {
     try {
       const res = await http.post("/auth/signup", payload);
+
+      token.value = res.data.token;
       clientId.value = res.data.clientId;
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
+
       return true;
     } catch (err) {
       console.error("Signup failed", err);
@@ -47,6 +53,7 @@ export const useAuthStore = () => {
   };
 
   return {
+    token,
     clientId,
     firstName,
     lastName,

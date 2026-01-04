@@ -17,6 +17,10 @@ defineExpose({
     open.value = true
   },
 })
+const onSuccess = () => {
+  open.value = false;
+  window.dispatchEvent(new Event("auth-success"));
+};
 </script>
 
 <template>
@@ -24,15 +28,17 @@ defineExpose({
     <DialogOverlay class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
     <DialogContent class="sm:max-w-md z-50">
       <Login
-        v-if="mode === 'login'"
-        @signup="mode = 'signup'"
-        @success="open = false"
-      />
-      <Signup
-        v-else
-        @login="mode = 'login'"
-        @success="open = false"
-      />
+  v-if="mode === 'login'"
+  @signup="mode = 'signup'"
+  @success="onSuccess"
+/>
+
+<Signup
+  v-else
+  @login="mode = 'login'"
+  @success="onSuccess"
+/>
+
     </DialogContent>
   </Dialog>
 </template>

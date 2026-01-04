@@ -6,6 +6,7 @@ import com.example.appointment.model.User;
 import com.example.appointment.repository.ClientRepository;
 import com.example.appointment.repository.CredentialRepository;
 import com.example.appointment.repository.UserRepository;
+import com.example.appointment.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,17 @@ public class AuthService {
     private final UserRepository userRepository;
     private final CredentialRepository credentialRepository;
     private final ClientRepository clientRepository;
+    private final JwtService jwtService;
+    private Map<String, Object> buildAuthResponse(User user, Client client) {
+        String token = jwtService.generateToken(user.getUserId(), client.getClientId());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("token", token);
+        result.put("clientId", client.getClientId());
+        result.put("firstName", user.getFirstName());
+        result.put("lastName", user.getLastName());
+        return result;
+    }
 
     public Map<String, Object> signup(String firstName, String lastName, String email,
                                       String phoneNumber, String nationalId, String password) {
@@ -48,12 +60,7 @@ public class AuthService {
         client.setCreatedAt(LocalDateTime.now());
         clientRepository.save(client);
 
-        // 4. Return info for frontend
-        Map<String, Object> result = new HashMap<>();
-        result.put("clientId", client.getClientId());
-        result.put("firstName", user.getFirstName());
-        result.put("lastName", user.getLastName());
-        return result;
+        return buildAuthResponse(user, client);
     }
 
     public Map<String, Object> login(String username, String password) {
@@ -68,10 +75,6 @@ public class AuthService {
         Client client = clientRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("clientId", client.getClientId());
-        result.put("firstName", user.getFirstName());
-        result.put("lastName", user.getLastName());
-        return result;
+        return buildAuthResponse(user, client);
     }
 }

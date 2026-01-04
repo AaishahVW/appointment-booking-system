@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { onMounted } from "vue";
 import BranchSelector from "./BranchSelector.vue";
 import AppointmentDatePicker from "./AppointmentDatePicker.vue";
 import AppointmentTimePicker from "./AppointmentTimePicker.vue";
@@ -34,6 +35,7 @@ const auth = useAuthStore();
 const employees = ref<any[]>([]);
 const availableTimes = ref<TimeSlot[]>([]);
 const selectedEmployee = ref<string | null>(null);
+const pendingBooking = ref<null | (() => Promise<void>)>(null);
 
 watch(
   [() => props.selectedBranchId, () => props.selectedDate],
@@ -53,9 +55,11 @@ watch(
 
 const confirmBooking = async () => {
   if (!auth.clientId?.value) {
+    pendingBooking.value = confirmBooking;
     emit("login-required");
     return;
   }
+
   if (
     !props.selectedBranchId ||
     !props.selectedDate ||
@@ -66,23 +70,28 @@ const confirmBooking = async () => {
     return;
   }
 
-  try {
-    await appointmentsApi.create({
-      clientId: auth.clientId.value,
-      employeeId: selectedEmployee.value,
-      branchId: props.selectedBranchId,
-      appointmentDate: props.selectedDate.toISOString().slice(0, 10),
-      startTime: props.modelValueTime,
-      endTime: props.modelValueTime, // adjust if needed
-      status: "BOOKED",
-    });
+  await appointmentsApi.create({
+    clientId: auth.clientId.value,
+    employeeId: selectedEmployee.value,
+    branchId: props.selectedBranchId,
+    appointmentDate: props.selectedDate.toISOString().slice(0, 10),
+    startTime: props.modelValueTime,
+    endTime: props.modelValueTime,
+    status: "BOOKED",
+  });
 
-    alert("Appointment booked successfully!");
-  } catch (err) {
-    console.error(err);
-    alert("Failed to book appointment.");
-  }
+  pendingBooking.value = null;
+  alert("Appointment booked successfully!");
 };
+
+onMounted(() => {
+  window.addEventListener("auth-success", async () => {
+    if (pendingBooking.value) {
+      await pendingBooking.value();
+    }
+  });
+});
+
 </script>
 
 <template>
