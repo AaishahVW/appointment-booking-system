@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { watch } from "vue";
+import { ref, watch, onMounted } from "vue";
+import { appointmentsApi } from "@/api/appointments.api";
+import { useAuthStore } from "@/stores/auth.store";
 import {
   Table,
   TableBody,
@@ -9,9 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ref, onMounted } from "vue";
-import { appointmentsApi } from "@/api/appointments.api";
-import { useAuthStore } from "@/stores/auth.store";
 
 const auth = useAuthStore();
 const appointments = ref<any[]>([]);
@@ -26,9 +25,10 @@ const loadAppointments = async () => {
   }
 };
 
+// ✅ Expose the method so parent can trigger reload
 defineExpose({
-  reload: loadAppointments
-})
+  reload: loadAppointments,
+});
 
 onMounted(loadAppointments);
 

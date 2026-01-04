@@ -13,13 +13,14 @@ const openLogin = () => authDialog.value?.openLogin();
 const selectedBranchId = ref<string | null>(null);
 const selectedDate = ref<Date | null>(null);
 const selectedTime = ref<string | null>(null);
-const tableRef = ref<InstanceType<typeof AppointmentTable> | null>(null)
+
+// ✅ Ref to the table so we can reload it
+const tableRef = ref<InstanceType<typeof AppointmentTable> | null>(null);
 
 const reloadAppointments = () => {
-  tableRef.value?.reload()
-}
+  tableRef.value?.reload();
+};
 </script>
-
 
 <template>
   <main class="pt-16">
@@ -34,7 +35,8 @@ const reloadAppointments = () => {
       @login-required="openLogin"
     />
 
-    <AppointmentTable v-if="auth.isLoggedIn" />
+    <!-- Pass ref so we can reload -->
+    <AppointmentTable v-if="auth.isLoggedIn" ref="tableRef" />
 
     <AuthDialog ref="authDialog" />
   </main>
