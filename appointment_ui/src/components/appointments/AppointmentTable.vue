@@ -25,7 +25,6 @@ const loadAppointments = async () => {
   }
 };
 
-// ✅ Expose the method so parent can trigger reload
 defineExpose({
   reload: loadAppointments,
 });
@@ -39,12 +38,12 @@ watch(
 </script>
 
 <template>
-  <Card class="h-[25vh] flex flex-col">
-    <CardHeader class="shrink-0">
+  <Card>
+    <CardHeader>
       <CardTitle>Your Appointments</CardTitle>
     </CardHeader>
 
-    <CardContent class="flex-1 overflow-y-auto">
+    <CardContent>
       <Table>
         <TableHeader>
           <TableRow>

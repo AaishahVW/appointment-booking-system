@@ -23,7 +23,6 @@ export const useAuthStore = defineStore("auth", () => {
       if (firstName.value) localStorage.setItem("firstName", firstName.value);
       if (lastName.value) localStorage.setItem("lastName", lastName.value);
 
-      // 🔥 notify whole app
       window.dispatchEvent(new Event("auth-success"));
 
       return true;

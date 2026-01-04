@@ -7,7 +7,7 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const auth = useAuthStore();
-  console.log("Interceptor token:", auth.token); // should log your token
+  console.log("Interceptor token:", auth.token);
   if (auth.token) {
     config.headers = new AxiosHeaders(config.headers).set(
       "Authorization",

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label'
 import { ref, type Ref } from 'vue'
 
 const defaultPlaceholder = today(getLocalTimeZone())
-// ✅ initialize date with today
+
 const date = ref(defaultPlaceholder) as Ref<DateValue>
 
 const df = new DateFormatter('en-US', { dateStyle: 'long' })
@@ -26,7 +26,7 @@ const onSelectDate = (d: DateValue | undefined) => {
   <div class="max-w-fit space-y-2">
     <Label class="py-3">Select Date</Label>
 
-    <Label class="rounded-md border px-3 py-2 text-sm">
+    <Label class="rounded-md border border-primary px-3 py-3">
       {{ df.format(date.toDate(getLocalTimeZone())) }}
     </Label>
 

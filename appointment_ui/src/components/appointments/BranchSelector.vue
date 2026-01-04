@@ -40,15 +40,15 @@ const filteredBranches = computed(() =>
     <Label>Select Branch</Label>
 
     <div class="relative">
-      <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
       <Input v-model="search" placeholder="Search branches" class="pl-9" />
     </div>
 
     <Accordion type="single" collapsible class="w-full">
       <AccordionItem v-for="branch in filteredBranches" :key="branch.branchId" :value="branch.branchId">
-        <AccordionTrigger class="text-sm font-medium">{{ branch.branchName }}</AccordionTrigger>
+        <AccordionTrigger>{{ branch.branchName }}</AccordionTrigger>
 
-        <AccordionContent class="space-y-2 text-sm">
+        <AccordionContent>
           <p>{{ branch.streetNumber }} {{ branch.streetName }}, {{ branch.city }}</p>
           <p>{{ branch.phoneNumber }}</p>
           <p>{{ branch.email }}</p>

@@ -44,7 +44,6 @@ const availableTimes = ref<TimeSlot[]>([]);
 const selectedEmployee = ref<string | null>(null);
 const pendingPayload = ref<PendingAppointmentPayload | null>(null);
 
-// Fetch available times & employees when branch/date changes
 watch(
   [() => props.selectedBranchId, () => props.selectedDate],
   async ([branchId, date]) => {
@@ -86,7 +85,6 @@ const confirmBooking = async () => {
     status: "BOOKED",
   };
 
-  // 🔐 Not logged in → pause booking
   if (!auth.isLoggedIn) {
     pendingPayload.value = payload;
     emit("login-required");
@@ -94,7 +92,6 @@ const confirmBooking = async () => {
     return;
   }
 
-  // ✅ Logged in → submit immediately
   try {
     await appointmentsApi.create({
       ...payload,
@@ -110,7 +107,6 @@ const confirmBooking = async () => {
   }
 };
 
-// Handle booking after login if pending
 watch(
   () => auth.isLoggedIn,
   async (loggedIn) => {
@@ -143,26 +139,15 @@ watch(
     </CardHeader>
 
     <CardContent>
-      <!-- Branch -->
       <BranchSelector @branch-selected="emit('branch-selected', $event)" />
-
       <Separator />
-
-      <!-- Date -->
       <AppointmentDatePicker @date-selected="emit('date-selected', $event)" />
-
-      <Separator />
-
-      <!-- Time -->
       <AppointmentTimePicker
         :times="availableTimes.map(t => t.startTime)"
         :model-value="props.modelValueTime"
         @update:model-value="emit('update:modelValueTime', $event)"
       />
-
       <Separator />
-
-      <!-- Employee -->
       <div v-if="employees.length" class="space-y-1 mt-2">
         <Label>Select Employee</Label>
         <Select v-model="selectedEmployee">
@@ -180,10 +165,7 @@ watch(
           </SelectContent>
         </Select>
       </div>
-
       <Separator />
-
-      <!-- Actions -->
       <div class="mt-4 flex items-center justify-between">
         <Button variant="outline" @click="() => { selectedEmployee = null }">Reset</Button>
         <Button @click="confirmBooking">Confirm Booking</Button>

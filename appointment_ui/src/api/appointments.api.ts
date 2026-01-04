@@ -6,9 +6,9 @@ export interface CreateAppointmentPayload {
   branchId: string;
   productId?: string | null;
   caseTypeId?: string | null;
-  appointmentDate: string; // YYYY-MM-DD
-  startTime: string; // HH:mm
-  endTime: string; // HH:mm
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
   status: string;
   notes?: string;
 }

@@ -14,7 +14,7 @@ export interface Branch {
 
 export const branchesApi = {
   getAll: async (): Promise<Branch[]> => {
-    const res = await http.get("/branches"); // token automatically attached
+    const res = await http.get("/branches");
     return res.data;
   },
 };
