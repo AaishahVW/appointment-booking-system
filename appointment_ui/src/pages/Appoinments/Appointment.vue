@@ -13,6 +13,11 @@ const openLogin = () => authDialog.value?.openLogin();
 const selectedBranchId = ref<string | null>(null);
 const selectedDate = ref<Date | null>(null);
 const selectedTime = ref<string | null>(null);
+const tableRef = ref<InstanceType<typeof AppointmentTable> | null>(null)
+
+const reloadAppointments = () => {
+  tableRef.value?.reload()
+}
 </script>
 
 
@@ -25,6 +30,7 @@ const selectedTime = ref<string | null>(null);
       @branch-selected="selectedBranchId = $event"
       @date-selected="selectedDate = $event"
       @update:modelValueTime="selectedTime = $event"
+      @appointment-booked="reloadAppointments"
       @login-required="openLogin"
     />
 

@@ -26,6 +26,10 @@ const loadAppointments = async () => {
   }
 };
 
+defineExpose({
+  reload: loadAppointments
+})
+
 onMounted(loadAppointments);
 
 watch(

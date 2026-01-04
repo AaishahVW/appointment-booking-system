@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { ref, watch } from "vue";
 import BranchSelector from "./BranchSelector.vue";
 import AppointmentDatePicker from "./AppointmentDatePicker.vue";
 import AppointmentTimePicker from "./AppointmentTimePicker.vue";
@@ -12,15 +12,17 @@ import { employeesApi } from "@/api/employees.api";
 import { timeSlotsApi, type TimeSlot } from "@/api/timeSlots.api";
 import { appointmentsApi } from "@/api/appointments.api";
 import { useAuthStore } from "@/stores/auth.store";
+import { toLocalDateString } from "@/utils/date";
+import { toast } from "vue-sonner";
 
 type PendingAppointmentPayload = {
-  employeeId: string
-  branchId: string
-  appointmentDate: string
-  startTime: string
-  endTime: string
-  status: "BOOKED"
-}
+  employeeId: string;
+  branchId: string;
+  appointmentDate: string;
+  startTime: string;
+  endTime: string;
+  status: "BOOKED";
+};
 
 const props = defineProps<{
   selectedBranchId: string | null;
@@ -32,6 +34,7 @@ const emit = defineEmits<{
   (e: "branch-selected", branchId: string): void;
   (e: "date-selected", date: Date): void;
   (e: "update:modelValueTime", time: string | null): void;
+  (e: "appointment-booked"): void;
   (e: "login-required"): void;
 }>();
 
@@ -41,7 +44,6 @@ const availableTimes = ref<TimeSlot[]>([]);
 const selectedEmployee = ref<string | null>(null);
 const pendingPayload = ref<PendingAppointmentPayload | null>(null);
 
-
 // Fetch available times & employees when branch/date changes
 watch(
   [() => props.selectedBranchId, () => props.selectedDate],
@@ -50,12 +52,17 @@ watch(
 
     selectedEmployee.value = null;
 
-    availableTimes.value = await timeSlotsApi.getByBranchAndDate(
-      branchId,
-      date.toISOString().slice(0, 10)
-    );
+    try {
+      availableTimes.value = await timeSlotsApi.getByBranchAndDate(
+        branchId,
+        toLocalDateString(date)
+      );
 
-    employees.value = await employeesApi.getByBranch(branchId);
+      employees.value = await employeesApi.getByBranch(branchId);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load employees or available times");
+    }
   }
 );
 
@@ -66,14 +73,14 @@ const confirmBooking = async () => {
     !props.modelValueTime ||
     !selectedEmployee.value
   ) {
-    alert("Please select branch, date, time, and employee");
+    toast.warning("Please select branch, date, time, and employee");
     return;
   }
 
   const payload: PendingAppointmentPayload = {
     employeeId: selectedEmployee.value,
     branchId: props.selectedBranchId,
-    appointmentDate: props.selectedDate.toISOString().slice(0, 10),
+    appointmentDate: toLocalDateString(props.selectedDate),
     startTime: props.modelValueTime,
     endTime: props.modelValueTime,
     status: "BOOKED",
@@ -83,6 +90,7 @@ const confirmBooking = async () => {
   if (!auth.isLoggedIn) {
     pendingPayload.value = payload;
     emit("login-required");
+    toast.info("Please log in to confirm your appointment");
     return;
   }
 
@@ -90,38 +98,39 @@ const confirmBooking = async () => {
   try {
     await appointmentsApi.create({
       ...payload,
-      clientId: auth.clientId!, // ✅ safe here
+      clientId: auth.clientId!,
     });
 
     pendingPayload.value = null;
-    alert("Appointment booked successfully!");
+    emit("appointment-booked");
+    toast.success("Appointment booked successfully!");
   } catch (err) {
     console.error(err);
-    alert("Failed to book appointment");
+    toast.error("Failed to book appointment");
   }
 };
 
-
-onMounted(() => {
-  window.addEventListener("auth-success", async () => {
-    if (!pendingPayload.value || !auth.clientId) return;
+// Handle booking after login if pending
+watch(
+  () => auth.isLoggedIn,
+  async (loggedIn) => {
+    if (!loggedIn || !pendingPayload.value || !auth.clientId) return;
 
     try {
       await appointmentsApi.create({
         ...pendingPayload.value,
-        clientId: auth.clientId, // ✅ now guaranteed
+        clientId: auth.clientId,
       });
 
       pendingPayload.value = null;
-      alert("Appointment booked successfully!");
+      emit("appointment-booked");
+      toast.success("Appointment booked successfully after login!");
     } catch (err) {
       console.error(err);
-      alert("Failed to book appointment after login");
+      toast.error("Failed to book appointment after login");
     }
-  });
-});
-
-
+  }
+);
 </script>
 
 <template>
