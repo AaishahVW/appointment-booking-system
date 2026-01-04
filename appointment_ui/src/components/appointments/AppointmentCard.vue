@@ -54,10 +54,10 @@ watch(
 );
 
 const confirmBooking = async () => {
-  if (!auth.clientId?.value) {
-    pendingBooking.value = confirmBooking;
-    emit("login-required");
-    return;
+  if (!auth.clientId) {
+    pendingBooking.value = confirmBooking
+    emit("login-required")
+    return
   }
 
   if (
@@ -66,23 +66,23 @@ const confirmBooking = async () => {
     !props.modelValueTime ||
     !selectedEmployee.value
   ) {
-    alert("Please select branch, date, time, and employee");
-    return;
+    alert("Please select branch, date, time, and employee")
+    return
   }
 
   await appointmentsApi.create({
-    clientId: auth.clientId.value,
+    clientId: auth.clientId,
     employeeId: selectedEmployee.value,
     branchId: props.selectedBranchId,
     appointmentDate: props.selectedDate.toISOString().slice(0, 10),
     startTime: props.modelValueTime,
     endTime: props.modelValueTime,
     status: "BOOKED",
-  });
+  })
 
-  pendingBooking.value = null;
-  alert("Appointment booked successfully!");
-};
+  pendingBooking.value = null
+  alert("Appointment booked successfully!")
+}
 
 onMounted(() => {
   window.addEventListener("auth-success", async () => {

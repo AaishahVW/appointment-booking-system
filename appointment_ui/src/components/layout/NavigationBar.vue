@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import CapitecLogo from '@/components/icons/CapitecLogo.vue'
 import UserAvatar from '@/components/auth/UserAvatar.vue'
+import { useAuthStore } from '@/stores/auth.store'
 
 defineEmits<{ (e: 'login'): void }>()
+
+const auth = useAuthStore()
 </script>
 
 <template>
@@ -15,8 +18,12 @@ defineEmits<{ (e: 'login'): void }>()
         </span>
       </div>
 
-      <!-- 🔥 forward event -->
-      <UserAvatar @login="$emit('login')" />
+      <UserAvatar
+        :is-logged-in="auth.isLoggedIn"
+        :first-name="auth.firstName ?? undefined"
+        :last-name="auth.lastName ?? undefined"
+        @login="$emit('login')"
+      />
     </div>
   </header>
 </template>

@@ -1,13 +1,16 @@
-import { ref } from "vue";
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 import { http } from "@/api/http";
 
-export const useAuthStore = () => {
-  const clientId = ref<string | null>(null);
-  const firstName = ref<string | null>(null);
-  const lastName = ref<string | null>(null);
-  const token = ref<string | null>(null);
+export const useAuthStore = defineStore("auth", () => {
+  const token = ref<string | null>(localStorage.getItem("token"));
+  const clientId = ref<string | null>(localStorage.getItem("clientId"));
+  const firstName = ref<string | null>(localStorage.getItem("firstName"));
+  const lastName = ref<string | null>(localStorage.getItem("lastName"));
 
-  const login = async (username: string, password: string) => {
+  const isLoggedIn = computed(() => !!token.value);
+
+  async function login(username: string, password: string) {
     try {
       const res = await http.post("/auth/login", { username, password });
 
@@ -16,21 +19,28 @@ export const useAuthStore = () => {
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
 
+      if (token.value) localStorage.setItem("token", token.value);
+      if (clientId.value) localStorage.setItem("clientId", clientId.value);
+      if (firstName.value) localStorage.setItem("firstName", firstName.value);
+      if (lastName.value) localStorage.setItem("lastName", lastName.value);
+
+      // 🔥 notify whole app
+      window.dispatchEvent(new Event("auth-success"));
+
       return true;
-    } catch (err) {
-      console.error("Login failed", err);
+    } catch (e) {
       return false;
     }
-  };
+  }
 
-  const signup = async (payload: {
+  async function signup(payload: {
     firstName: string;
     lastName: string;
     email: string;
     phoneNumber: string;
     nationalId: string;
     password: string;
-  }) => {
+  }) {
     try {
       const res = await http.post("/auth/signup", payload);
 
@@ -39,26 +49,39 @@ export const useAuthStore = () => {
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
 
+      if (token.value) localStorage.setItem("token", token.value);
+      if (clientId.value) localStorage.setItem("clientId", clientId.value);
+      if (firstName.value) localStorage.setItem("firstName", firstName.value);
+      if (lastName.value) localStorage.setItem("lastName", lastName.value);
+
+      window.dispatchEvent(new Event("auth-success"));
+
       return true;
-    } catch (err) {
-      console.error("Signup failed", err);
+    } catch (e) {
       return false;
     }
-  };
+  }
 
-  const logout = () => {
+  function logout() {
+    token.value = null;
     clientId.value = null;
     firstName.value = null;
     lastName.value = null;
-  };
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("clientId");
+    localStorage.removeItem("firstName");
+    localStorage.removeItem("lastName");
+  }
 
   return {
     token,
     clientId,
     firstName,
     lastName,
+    isLoggedIn,
     login,
     signup,
     logout,
   };
-};
+});
