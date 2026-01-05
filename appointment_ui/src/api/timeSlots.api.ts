@@ -7,9 +7,7 @@ export interface TimeSlot {
 }
 
 export const timeSlotsApi = {
-  getByBranchAndDate(branchId: string, date: string) {
-    return http
-      .get<TimeSlot[]>(`/time-slots?branchId=${branchId}&date=${date}`)
-      .then((res) => res.data);
+  getAll() {
+    return http.get<TimeSlot[]>("/time-slots").then((res) => res.data);
   },
 };

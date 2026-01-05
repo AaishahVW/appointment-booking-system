@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import BranchSelector from "./BranchSelector.vue";
-import AppointmentDatePicker from "./AppointmentDatePicker.vue";
-import AppointmentTimePicker from "./AppointmentTimePicker.vue";
+import AppointmentDateTimePicker from "./AppointmentDateTimePicker.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { employeesApi } from "@/api/employees.api";
 import { timeSlotsApi, type TimeSlot } from "@/api/timeSlots.api";
 import { appointmentsApi } from "@/api/appointments.api";
@@ -39,40 +36,44 @@ const emit = defineEmits<{
 }>();
 
 const auth = useAuthStore();
-const employees = ref<any[]>([]);
+
 const availableTimes = ref<TimeSlot[]>([]);
+const employees = ref<any[]>([]);
 const selectedEmployee = ref<string | null>(null);
 const pendingPayload = ref<PendingAppointmentPayload | null>(null);
 
-watch(
-  [() => props.selectedBranchId, () => props.selectedDate],
-  async ([branchId, date]) => {
-    if (!branchId || !date) return;
+onMounted(async () => {
+  try {
+    availableTimes.value = await timeSlotsApi.getAll();
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to load time slots");
+  }
+});
 
-    selectedEmployee.value = null;
+watch(
+  () => props.selectedBranchId,
+  async (branchId) => {
+    if (!branchId) {
+      employees.value = [];
+      selectedEmployee.value = null;
+      return;
+    }
 
     try {
-      availableTimes.value = await timeSlotsApi.getByBranchAndDate(
-        branchId,
-        toLocalDateString(date)
-      );
-
       employees.value = await employeesApi.getByBranch(branchId);
+      selectedEmployee.value = employees.value.length ? employees.value[0].employeeId : null;
     } catch (err) {
       console.error(err);
-      toast.error("Failed to load employees or available times");
+      toast.error("Failed to load employees");
     }
-  }
+  },
+  { immediate: true }
 );
 
 const confirmBooking = async () => {
-  if (
-    !props.selectedBranchId ||
-    !props.selectedDate ||
-    !props.modelValueTime ||
-    !selectedEmployee.value
-  ) {
-    toast.warning("Please select branch, date, time, and employee");
+  if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime || !selectedEmployee.value) {
+    toast.warning("Please select branch, date, and time");
     return;
   }
 
@@ -97,7 +98,6 @@ const confirmBooking = async () => {
       ...payload,
       clientId: auth.clientId!,
     });
-
     pendingPayload.value = null;
     emit("appointment-booked");
     toast.success("Appointment booked successfully!");
@@ -117,7 +117,6 @@ watch(
         ...pendingPayload.value,
         clientId: auth.clientId,
       });
-
       pendingPayload.value = null;
       emit("appointment-booked");
       toast.success("Appointment booked successfully after login!");
@@ -130,44 +129,32 @@ watch(
 </script>
 
 <template>
-  <Card class="flex h-full">
+  <Card class="flex h-full bg-surface/75">
     <CardHeader>
       <CardTitle>Book an Appointment</CardTitle>
       <CardDescription>
-        Choose a branch, date, time, and employee
+        Choose a branch, date, and time
       </CardDescription>
     </CardHeader>
-
+    <Separator />
     <CardContent>
-      <BranchSelector @branch-selected="emit('branch-selected', $event)" />
-      <Separator />
-      <AppointmentDatePicker @date-selected="emit('date-selected', $event)" />
-      <AppointmentTimePicker
-        :times="availableTimes.map(t => t.startTime)"
-        :model-value="props.modelValueTime"
-        @update:model-value="emit('update:modelValueTime', $event)"
+      <BranchSelector
+        :model-value-branch="props.selectedBranchId"
+        @update:modelValueBranch="$emit('branch-selected', $event)"
+        @branch-selected="$emit('branch-selected', $event)"
       />
+
+      <AppointmentDateTimePicker
+        :times="availableTimes.map(t => t.startTime)"
+        :selected-time="props.modelValueTime"
+        @date-selected="$emit('date-selected', $event)"
+        @update:selectedTime="$emit('update:modelValueTime', $event)"
+      />
+
       <Separator />
-      <div v-if="employees.length" class="space-y-1 mt-2">
-        <Label>Select Employee</Label>
-        <Select v-model="selectedEmployee">
-          <SelectTrigger class="w-full">
-            <SelectValue placeholder="-- select an employee --" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem
-              v-for="emp in employees"
-              :key="emp.employeeId"
-              :value="emp.employeeId"
-            >
-              {{ emp.workEmail || emp.userId }}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-      <Separator />
+
       <div class="mt-4 flex items-center justify-between">
-        <Button variant="outline" @click="() => { selectedEmployee = null }">Reset</Button>
+        <Button variant="outline" @click="selectedEmployee = null">Reset</Button>
         <Button @click="confirmBooking">Confirm Booking</Button>
       </div>
     </CardContent>

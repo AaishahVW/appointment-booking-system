@@ -24,7 +24,7 @@ const selectTime = (time: string) => {
       <Button
         v-for="time in times"
         :key="time"
-        variant="outline"
+        variant="secondary"
         size="md"
         @click="selectTime(time)"
         :class="cn(

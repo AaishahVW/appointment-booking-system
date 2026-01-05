@@ -23,10 +23,10 @@ const onSelectDate = (d: DateValue | undefined) => {
 </script>
 
 <template>
-  <div class="max-w-fit space-y-2">
+
     <Label class="py-3">Select Date</Label>
 
-    <Label class="rounded-md border border-primary px-3 py-3">
+    <Label class="bg-surface/50 rounded-md px-3 py-3">
       {{ df.format(date.toDate(getLocalTimeZone())) }}
     </Label>
 
@@ -36,7 +36,6 @@ const onSelectDate = (d: DateValue | undefined) => {
       layout="month-and-year"
       initial-focus
       @update:model-value="onSelectDate"
-      class=" [&_button]:w-15 [&_th]:text-center"
     />
-  </div>
+
 </template>

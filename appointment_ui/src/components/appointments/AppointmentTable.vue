@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { appointmentsApi } from "@/api/appointments.api";
+import { branchesApi, type Branch } from "@/api/branch.api";
 import { useAuthStore } from "@/stores/auth.store";
 import {
   Table,
@@ -11,19 +12,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const auth = useAuthStore();
 const appointments = ref<any[]>([]);
+const branches = ref<Branch[]>([]);
+
+onMounted(async () => {
+  branches.value = await branchesApi.getAll();
+});
 
 const loadAppointments = async () => {
-  if (!auth.clientId) return;
-
   try {
+    if (!auth.clientId) return;
     appointments.value = await appointmentsApi.getByClient(auth.clientId);
+    console.log("First appointment:", appointments.value[1]);
   } catch (err) {
     console.error("Failed to load appointments", err);
   }
 };
+
 
 defineExpose({
   reload: loadAppointments,
@@ -38,11 +46,11 @@ watch(
 </script>
 
 <template>
-  <Card>
+  <Card class="flex h-full bg-surface/75">
     <CardHeader>
       <CardTitle>Your Appointments</CardTitle>
     </CardHeader>
-
+<Separator />
     <CardContent>
       <Table>
         <TableHeader>
@@ -54,14 +62,14 @@ watch(
           </TableRow>
         </TableHeader>
 
-        <TableBody>
-          <TableRow v-for="a in appointments" :key="a.id">
-            <TableCell>{{ a.branchName }}</TableCell>
-            <TableCell>{{ a.appointmentDate }}</TableCell>
-            <TableCell>{{ a.startTime }}</TableCell>
-            <TableCell>{{ a.status }}</TableCell>
-          </TableRow>
-        </TableBody>
+      <TableBody>
+  <TableRow v-for="a in appointments" :key="a.appointmentId">
+    <TableCell>{{ a.branch?.branchName ?? "Unknown" }}</TableCell>
+    <TableCell>{{ a.appointmentDate }}</TableCell>
+    <TableCell>{{ a.startTime }}</TableCell>
+    <TableCell>{{ a.status }}</TableCell>
+  </TableRow>
+</TableBody>
       </Table>
     </CardContent>
   </Card>
