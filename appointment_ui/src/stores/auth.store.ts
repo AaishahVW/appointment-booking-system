@@ -18,10 +18,10 @@ export const useAuthStore = defineStore("auth", () => {
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
 
-      if (token.value) localStorage.setItem("token", token.value);
-      if (clientId.value) localStorage.setItem("clientId", clientId.value);
-      if (firstName.value) localStorage.setItem("firstName", firstName.value);
-      if (lastName.value) localStorage.setItem("lastName", lastName.value);
+      if (token.value) sessionStorage.setItem("token", token.value);
+      if (clientId.value) sessionStorage.setItem("clientId", clientId.value);
+      if (firstName.value) sessionStorage.setItem("firstName", firstName.value);
+      if (lastName.value) sessionStorage.setItem("lastName", lastName.value);
 
       window.dispatchEvent(new Event("auth-success"));
 
@@ -47,10 +47,10 @@ export const useAuthStore = defineStore("auth", () => {
       firstName.value = res.data.firstName;
       lastName.value = res.data.lastName;
 
-      if (token.value) localStorage.setItem("token", token.value);
-      if (clientId.value) localStorage.setItem("clientId", clientId.value);
-      if (firstName.value) localStorage.setItem("firstName", firstName.value);
-      if (lastName.value) localStorage.setItem("lastName", lastName.value);
+      if (token.value) sessionStorage.setItem("token", token.value);
+      if (clientId.value) sessionStorage.setItem("clientId", clientId.value);
+      if (firstName.value) sessionStorage.setItem("firstName", firstName.value);
+      if (lastName.value) sessionStorage.setItem("lastName", lastName.value);
 
       window.dispatchEvent(new Event("auth-success"));
 
@@ -66,10 +66,10 @@ export const useAuthStore = defineStore("auth", () => {
     firstName.value = null;
     lastName.value = null;
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("clientId");
-    localStorage.removeItem("firstName");
-    localStorage.removeItem("lastName");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("clientId");
+    sessionStorage.removeItem("firstName");
+    sessionStorage.removeItem("lastName");
     location.reload();
   }
 

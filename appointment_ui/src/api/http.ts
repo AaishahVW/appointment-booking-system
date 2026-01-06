@@ -7,7 +7,6 @@ export const http = axios.create({
 
 http.interceptors.request.use((config) => {
   const auth = useAuthStore();
-  console.log("Interceptor token:", auth.token);
   if (auth.token) {
     config.headers = new AxiosHeaders(config.headers).set(
       "Authorization",
@@ -16,3 +15,16 @@ http.interceptors.request.use((config) => {
   }
   return config;
 });
+
+http.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const auth = useAuthStore();
+
+    if (error.response?.status === 401) {
+      auth.logout();
+    }
+
+    return Promise.reject(error);
+  }
+);
