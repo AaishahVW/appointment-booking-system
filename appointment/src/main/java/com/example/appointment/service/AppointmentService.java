@@ -27,7 +27,7 @@ public class AppointmentService {
         Appointment appointment = Appointment.builder()
                 .clientId(dto.getClientId())
                 .employeeId(dto.getEmployeeId())
-                .branch(branch) // ✅ REQUIRED
+                .branch(branch)
                 .productId(dto.getProductId())
                 .caseTypeId(dto.getCaseTypeId())
                 .appointmentDate(dto.getAppointmentDate())
@@ -50,6 +50,9 @@ public class AppointmentService {
 
     public List<Appointment> getAll() {
         return repository.findAll();
+    }
+    public List<Appointment> getByClientId(UUID clientId) {
+        return repository.findByClientId(clientId);
     }
 
     public Appointment update(UUID id, Appointment update) {

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import { appointmentsApi } from "@/api/appointments.api";
-import { branchesApi, type Branch } from "@/api/branch.api";
 import { useAuthStore } from "@/stores/auth.store";
 import {
   Table,
@@ -16,26 +15,21 @@ import { Separator } from "@/components/ui/separator";
 
 const auth = useAuthStore();
 const appointments = ref<any[]>([]);
-const branches = ref<Branch[]>([]);
-
-onMounted(async () => {
-  branches.value = await branchesApi.getAll();
-});
 
 const loadAppointments = async () => {
   try {
-    if (!auth.clientId) return;
-    appointments.value = await appointmentsApi.getByClient(auth.clientId);
-    console.log("First appointment:", appointments.value[1]);
+    if (!auth.clientId) {
+      appointments.value = [];
+      return;
+    }
+
+    appointments.value = await appointmentsApi.getMine();
   } catch (err) {
     console.error("Failed to load appointments", err);
   }
 };
 
-
-defineExpose({
-  reload: loadAppointments,
-});
+defineExpose({ reload: loadAppointments });
 
 onMounted(loadAppointments);
 

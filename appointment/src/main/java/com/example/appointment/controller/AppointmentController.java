@@ -40,6 +40,12 @@ public class AppointmentController {
         return ResponseEntity.ok(service.getAll());
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<Appointment>> getMyAppointments(HttpServletRequest request) {
+        UUID clientId = UUID.fromString((String) request.getAttribute("clientId"));
+        return ResponseEntity.ok(service.getByClientId(clientId));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<Appointment> update(@PathVariable UUID id, @RequestBody Appointment appointment) {
         return ResponseEntity.ok(service.update(id, appointment));

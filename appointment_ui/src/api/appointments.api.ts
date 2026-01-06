@@ -17,9 +17,7 @@ export const appointmentsApi = {
   create(payload: CreateAppointmentPayload) {
     return http.post("/appointments", payload).then((res) => res.data);
   },
-  getByClient(clientId: string) {
-    return http
-      .get(`/appointments?clientId=${clientId}`)
-      .then((res) => res.data);
+  getMine() {
+    return http.get("/appointments/me").then((res) => res.data);
   },
 };
