@@ -23,7 +23,7 @@ const handleLogout = () => {
     <Button
       v-if="!auth.isLoggedIn"
       @click="$emit('login')"
-      class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50 bg-background"
+      class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50 bg-transparent"
     >
       <Avatar>
         <AvatarImage src="https://github.com/shadcn.png" />
@@ -35,7 +35,7 @@ const handleLogout = () => {
     <!-- Logged in -->
     <DropdownMenu v-else>
       <DropdownMenuTrigger asChild>
-        <Button class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50 bg-background">
+        <Button class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50 bg-transparent">
           <Avatar>
             <AvatarFallback>{{ initials(auth.firstName, auth.lastName) }}</AvatarFallback>
           </Avatar>
