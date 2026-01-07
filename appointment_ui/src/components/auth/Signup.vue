@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useAuthStore } from "@/stores/auth.store";
-
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { ref } from "vue"
+import { useAuthStore } from "@/stores/auth.store"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Card,
   CardHeader,
@@ -12,21 +11,23 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 
 const emit = defineEmits<{
-  (e: "login"): void;
-  (e: "success"): void;
-}>();
+  (e: "login"): void
+  (e: "success"): void
+}>()
 
-const auth = useAuthStore();
+const auth = useAuthStore()
+const errorMessage = ref<string | null>(null)
 
-const firstName = ref("");
-const lastName = ref("");
-const email = ref("");
-const phoneNumber = ref("");
-const nationalId = ref("");
-const password = ref("");
+const firstName = ref("")
+const lastName = ref("")
+const email = ref("")
+const phoneNumber = ref("")
+const nationalId = ref("")
+const password = ref("")
 
 const handleSignup = async () => {
   const success = await auth.signup({
@@ -36,67 +37,48 @@ const handleSignup = async () => {
     phoneNumber: phoneNumber.value,
     nationalId: nationalId.value,
     password: password.value,
-  });
+  })
 
   if (success) {
-    emit("success");
+    errorMessage.value = null
+    emit("success")
   } else {
-    alert("Signup failed. Try again.");
+    errorMessage.value = "Signup failed. Please check your details."
   }
-};
+}
 </script>
 
 <template>
   <Card>
     <CardHeader>
       <CardTitle>Create account</CardTitle>
-      <CardDescription>
-        Fill in your details to sign up
-      </CardDescription>
+      <CardDescription>Fill in your details to sign up</CardDescription>
     </CardHeader>
 
     <CardContent>
+      <Alert v-if="errorMessage" variant="error" class="mb-4">
+        <AlertTitle>Signup failed</AlertTitle>
+        <AlertDescription>{{ errorMessage }}</AlertDescription>
+      </Alert>
+
       <form @submit.prevent="handleSignup" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
           <div class="space-y-1">
-            <Label for="firstName">First name</Label>
-            <Input id="firstName" v-model="firstName" required />
+            <Label>First name</Label>
+            <Input v-model="firstName" required />
           </div>
-
           <div class="space-y-1">
-            <Label for="lastName">Last name</Label>
-            <Input id="lastName" v-model="lastName" required />
+            <Label>Last name</Label>
+            <Input v-model="lastName" required />
           </div>
         </div>
 
-        <div class="space-y-1">
-          <Label for="email">Email</Label>
-          <Input id="email" type="email" v-model="email" />
-        </div>
+        <Input v-model="email" type="email" placeholder="Email" />
+        <Input v-model="phoneNumber" placeholder="Phone number" />
+        <Input v-model="nationalId" placeholder="National ID" required />
+        <Input v-model="password" type="password" placeholder="Password" required />
 
-        <div class="space-y-1">
-          <Label for="phone">Phone number</Label>
-          <Input id="phone" v-model="phoneNumber" />
-        </div>
-
-        <div class="space-y-1">
-          <Label for="nationalId">National ID</Label>
-          <Input id="nationalId" v-model="nationalId" required />
-        </div>
-
-        <div class="space-y-1">
-          <Label for="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            v-model="password"
-            required
-          />
-        </div>
-
-        <Button type="submit" class="w-full">
-          Sign up
-        </Button>
+        <Button type="submit" class="w-full">Sign up</Button>
       </form>
     </CardContent>
 
