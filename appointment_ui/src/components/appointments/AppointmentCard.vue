@@ -43,7 +43,7 @@ const emit = defineEmits([
 
 const auth = useAuthStore()
 const alertMessage = ref<string | null>(null)
-
+const successMessage = ref<string | null>(null)
 const availableTimes = ref<TimeSlot[]>([])
 const employees = ref<any[]>([])
 const selectedEmployee = ref<string | null>(null)
@@ -99,13 +99,44 @@ const confirmBooking = async () => {
   }
 
   try {
-    await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
-    emit("appointment-booked")
-  } catch (err) {
+  await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
+
+  successMessage.value = "Appointment booked successfully 🎉"
+  alertMessage.value = null
+  pendingPayload.value = null
+
+  emit("appointment-booked")
+} catch (err) {
     console.error(err)
     alertMessage.value = "Failed to book appointment."
   }
 }
+
+watch(
+  () => auth.isLoggedIn,
+  async (loggedIn) => {
+    if (!loggedIn) return
+    if (!pendingPayload.value) return
+    if (!auth.clientId) return
+
+    try {
+      await appointmentsApi.create({
+        ...pendingPayload.value,
+        clientId: auth.clientId,
+      })
+
+      pendingPayload.value = null
+      alertMessage.value = null
+      successMessage.value = "Appointment booked successfully 🎉"
+
+      emit("appointment-booked")
+    } catch (err) {
+      console.error(err)
+      alertMessage.value = "Failed to book appointment after login."
+    }
+  }
+)
+
 </script>
 
 <template>
@@ -134,6 +165,10 @@ const confirmBooking = async () => {
         @date-selected="$emit('date-selected', $event)"
         @update:selectedTime="$emit('update:modelValueTime', $event)"
       />
+<Alert v-if="successMessage" class="mb-4">
+  <AlertTitle>Success</AlertTitle>
+  <AlertDescription>{{ successMessage }}</AlertDescription>
+</Alert>
 
       <Separator />
 
