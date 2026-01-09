@@ -3,11 +3,11 @@ import { ref, computed } from "vue";
 import { http } from "@/api/http";
 
 export const useAuthStore = defineStore("auth", () => {
-  const token = ref<string | null>(localStorage.getItem("token"));
+  const token = ref<string | null>(sessionStorage.getItem("token"));
   const isLoggedIn = computed(() => !!token.value);
-  const clientId = ref<string | null>(localStorage.getItem("clientId"));
-  const firstName = ref<string | null>(localStorage.getItem("firstName"));
-  const lastName = ref<string | null>(localStorage.getItem("lastName"));
+  const clientId = ref<string | null>(sessionStorage.getItem("clientId"));
+  const firstName = ref<string | null>(sessionStorage.getItem("firstName"));
+  const lastName = ref<string | null>(sessionStorage.getItem("lastName"));
 
   async function login(username: string, password: string) {
     try {
@@ -22,8 +22,6 @@ export const useAuthStore = defineStore("auth", () => {
       if (clientId.value) sessionStorage.setItem("clientId", clientId.value);
       if (firstName.value) sessionStorage.setItem("firstName", firstName.value);
       if (lastName.value) sessionStorage.setItem("lastName", lastName.value);
-
-      window.dispatchEvent(new Event("auth-success"));
 
       return true;
     } catch (e) {
@@ -51,8 +49,6 @@ export const useAuthStore = defineStore("auth", () => {
       if (clientId.value) sessionStorage.setItem("clientId", clientId.value);
       if (firstName.value) sessionStorage.setItem("firstName", firstName.value);
       if (lastName.value) sessionStorage.setItem("lastName", lastName.value);
-
-      window.dispatchEvent(new Event("auth-success"));
 
       return true;
     } catch (e) {

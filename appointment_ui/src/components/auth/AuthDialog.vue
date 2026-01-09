@@ -19,7 +19,6 @@ defineExpose({
 })
 const onSuccess = () => {
   open.value = false;
-  window.dispatchEvent(new Event("auth-success"));
 };
 </script>
 

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, CheckCircle2 } from "lucide-vue-next"
 import { employeesApi } from "@/api/employees.api"
 import { timeSlotsApi, type TimeSlot } from "@/api/timeSlots.api"
 import { appointmentsApi } from "@/api/appointments.api"
@@ -42,12 +43,16 @@ const emit = defineEmits([
 ])
 
 const auth = useAuthStore()
+
 const alertMessage = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
+
 const availableTimes = ref<TimeSlot[]>([])
 const employees = ref<any[]>([])
 const selectedEmployee = ref<string | null>(null)
+
 const pendingPayload = ref<PendingAppointmentPayload | null>(null)
+const isBooking = ref(false)
 
 onMounted(async () => {
   try {
@@ -55,8 +60,16 @@ onMounted(async () => {
   } catch (err) {
     console.error(err)
     alertMessage.value = "Failed to load available time slots."
+    clearAlertAfter()
   }
 })
+
+const clearAlertAfter = (ms = 3000) => {
+  setTimeout(() => {
+    alertMessage.value = null
+    successMessage.value = null
+  }, ms)
+}
 
 watch(
   () => props.selectedBranchId,
@@ -69,16 +82,21 @@ watch(
     } catch (err) {
       console.error(err)
       alertMessage.value = "Failed to load employees."
+      clearAlertAfter()
     }
   },
   { immediate: true }
 )
 
 const confirmBooking = async () => {
+  if (isBooking.value) return
+  isBooking.value = true
   alertMessage.value = null
 
   if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime) {
     alertMessage.value = "Please select a branch, date, and time."
+    clearAlertAfter()
+    isBooking.value = false
     return
   }
 
@@ -95,20 +113,27 @@ const confirmBooking = async () => {
     pendingPayload.value = payload
     emit("login-required")
     alertMessage.value = "Please log in to confirm your appointment."
+    clearAlertAfter()
+    isBooking.value = false
     return
   }
 
   try {
-  await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
+    await appointmentsApi.create({
+      ...payload,
+      clientId: auth.clientId!,
+    })
 
-  successMessage.value = "Appointment booked successfully 🎉"
-  alertMessage.value = null
-  pendingPayload.value = null
-
-  emit("appointment-booked")
-} catch (err) {
+    successMessage.value = "Appointment booked successfully 🎉"
+    pendingPayload.value = null
+    emit("appointment-booked")
+    clearAlertAfter()
+  } catch (err) {
     console.error(err)
-    alertMessage.value = "Failed to book appointment."
+    alertMessage.value = "Failed to book appointment after login."
+    clearAlertAfter()
+  } finally {
+    isBooking.value = false
   }
 }
 
@@ -118,6 +143,9 @@ watch(
     if (!loggedIn) return
     if (!pendingPayload.value) return
     if (!auth.clientId) return
+    if (isBooking.value) return
+
+    isBooking.value = true
 
     try {
       await appointmentsApi.create({
@@ -126,17 +154,18 @@ watch(
       })
 
       pendingPayload.value = null
-      alertMessage.value = null
       successMessage.value = "Appointment booked successfully 🎉"
-
       emit("appointment-booked")
+      clearAlertAfter()
     } catch (err) {
       console.error(err)
-      alertMessage.value = "Failed to book appointment after login."
+      alertMessage.value = "Failed to book appointment."
+      clearAlertAfter()
+    } finally {
+      isBooking.value = false
     }
   }
 )
-
 </script>
 
 <template>
@@ -149,9 +178,12 @@ watch(
     <Separator />
 
     <CardContent>
-      <Alert v-if="alertMessage" variant="error" class="mb-4">
-        <AlertTitle>Notice</AlertTitle>
-        <AlertDescription>{{ alertMessage }}</AlertDescription>
+      <Alert v-if="alertMessage" variant="error" class="mb-4 flex gap-2">
+        <AlertCircle class="h-4 w-4 mt-1" />
+        <div>
+          <AlertTitle>Notice</AlertTitle>
+          <AlertDescription>{{ alertMessage }}</AlertDescription>
+        </div>
       </Alert>
 
       <BranchSelector
@@ -165,16 +197,24 @@ watch(
         @date-selected="$emit('date-selected', $event)"
         @update:selectedTime="$emit('update:modelValueTime', $event)"
       />
-<Alert v-if="successMessage" class="mb-4">
-  <AlertTitle>Success</AlertTitle>
-  <AlertDescription>{{ successMessage }}</AlertDescription>
-</Alert>
+
+      <Alert v-if="successMessage" class="mb-4 flex gap-2">
+        <CheckCircle2 class="h-4 w-4 mt-1" />
+        <div>
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>{{ successMessage }}</AlertDescription>
+        </div>
+      </Alert>
 
       <Separator />
 
       <div class="mt-4 flex justify-between">
-        <Button variant="outline" @click="selectedEmployee = null">Reset</Button>
-        <Button @click="confirmBooking">Confirm Booking</Button>
+        <Button variant="outline" @click="selectedEmployee = null">
+          Reset
+        </Button>
+        <Button @click="confirmBooking">
+          Confirm Booking
+        </Button>
       </div>
     </CardContent>
   </Card>
