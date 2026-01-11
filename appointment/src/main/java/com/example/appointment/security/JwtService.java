@@ -20,7 +20,7 @@ public class JwtService {
                 .setSubject(userId.toString())
                 .claim("clientId", clientId.toString())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 24h
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000))
                 .signWith(key)
                 .compact();
     }
