@@ -35,7 +35,6 @@ public class AuthService {
     public Map<String, Object> signup(String firstName, String lastName, String email,
                                       String phoneNumber, String nationalId, String password) {
 
-        // 1. Create user
         User user = new User();
         user.setFirstName(firstName);
         user.setLastName(lastName);
@@ -45,15 +44,13 @@ public class AuthService {
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
 
-        // 2. Create credentials
         Credential credential = new Credential();
         credential.setUser(user);
-        credential.setUsername(nationalId); // username = nationalId
+        credential.setUsername(nationalId);
         credential.setPasswordHash(BCrypt.hashpw(password, BCrypt.gensalt()));
         credential.setCreatedAt(LocalDateTime.now());
         credentialRepository.save(credential);
 
-        // 3. Create client (CE number auto-generated)
         Client client = new Client();
         client.setUser(user);
         client.setCeNumber("CE-" + UUID.randomUUID().toString().substring(0, 8));

@@ -27,18 +27,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/branches/**",
                                 "/api/employees/**",
+                                "/api/business-hours/**",
                                 "/api/time-slots/**"
                         ).permitAll()
-
-                        // PROTECTED
                         .requestMatchers("/api/appointments/**").authenticated()
-
-                        // EVERYTHING ELSE
                         .anyRequest().denyAll()
                 )
 

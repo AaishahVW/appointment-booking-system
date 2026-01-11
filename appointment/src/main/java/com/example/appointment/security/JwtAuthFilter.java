@@ -41,18 +41,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             String userId = claims.getSubject();
             String clientId = claims.get("clientId", String.class);
-
-            // ✅ THIS IS THE KEY PART
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                            userId,        // principal
-                            null,          // credentials
-                            Collections.emptyList() // authorities (roles later)
+                            userId,
+                            null,
+                            Collections.emptyList()
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            // Optional (still useful for controllers)
             request.setAttribute("clientId", clientId);
 
         } catch (Exception e) {
