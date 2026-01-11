@@ -20,4 +20,7 @@ export const appointmentsApi = {
   getMine() {
     return http.get("/appointments/me").then((res) => res.data);
   },
+  update(id: string, payload: Partial<CreateAppointmentPayload>) {
+    return http.put(`/appointments/${id}`, payload).then((res) => res.data);
+  },
 };

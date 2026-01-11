@@ -1,6 +1,7 @@
 package com.example.appointment.controller;
 
 import com.example.appointment.dto.AppointmentDTO;
+import com.example.appointment.dto.AppointmentUpdateDTO;
 import com.example.appointment.model.Appointment;
 import com.example.appointment.service.AppointmentService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,8 +48,11 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Appointment> update(@PathVariable UUID id, @RequestBody Appointment appointment) {
-        return ResponseEntity.ok(service.update(id, appointment));
+    public ResponseEntity<Appointment> update(
+            @PathVariable UUID id,
+            @RequestBody AppointmentUpdateDTO dto
+    ) {
+        return ResponseEntity.ok(service.update(id, dto));
     }
 
     @DeleteMapping("/{id}")

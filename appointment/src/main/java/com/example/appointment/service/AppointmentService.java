@@ -1,6 +1,7 @@
 package com.example.appointment.service;
 
 import com.example.appointment.dto.AppointmentDTO;
+import com.example.appointment.dto.AppointmentUpdateDTO;
 import com.example.appointment.model.Appointment;
 import com.example.appointment.model.Branch;
 import com.example.appointment.repository.AppointmentRepository;
@@ -55,16 +56,33 @@ public class AppointmentService {
         return repository.findByClientId(clientId);
     }
 
-    public Appointment update(UUID id, Appointment update) {
+    public Appointment update(UUID id, AppointmentUpdateDTO dto) {
         Appointment appointment = getById(id);
-        appointment.setAppointmentDate(update.getAppointmentDate());
-        appointment.setStartTime(update.getStartTime());
-        appointment.setEndTime(update.getEndTime());
-        appointment.setStatus(update.getStatus());
-        appointment.setNotes(update.getNotes());
+
+        if (dto.getAppointmentDate() != null) {
+            appointment.setAppointmentDate(dto.getAppointmentDate());
+        }
+
+        if (dto.getStartTime() != null) {
+            appointment.setStartTime(dto.getStartTime());
+        }
+
+        if (dto.getEndTime() != null) {
+            appointment.setEndTime(dto.getEndTime());
+        }
+
+        if (dto.getStatus() != null) {
+            appointment.setStatus(dto.getStatus());
+        }
+
+        if (dto.getNotes() != null) {
+            appointment.setNotes(dto.getNotes());
+        }
+
         appointment.setUpdatedAt(LocalDateTime.now());
         return repository.save(appointment);
     }
+
 
     public void delete(UUID id) {
         repository.deleteById(id);
