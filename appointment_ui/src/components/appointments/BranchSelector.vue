@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { Search } from "lucide-vue-next"
-import { branchesApi, type Branch } from "@/api/branch.api"
+import { branchesApi, type BranchWithHours } from "@/api/branch.api"
 
 const props = defineProps<{ modelValueBranch: string | null }>()
 
@@ -21,7 +21,7 @@ const emits = defineEmits<{
 }>()
 
 const selectedBranch = ref<string | null>(null)
-const branches = ref<Branch[]>([])
+const branches = ref<BranchWithHours[]>([])
 const search = ref("")
 const errorMessage = ref<string | null>(null)
 
@@ -60,33 +60,46 @@ const filteredBranches = computed(() =>
 
     <div class="relative">
       <Search class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
-      <Input v-model="search" placeholder="Search branches" class="pl-9 bg-surface/50" />
+      <Input
+        v-model="search"
+        placeholder="Search branches"
+        class="pl-9 bg-surface/50"
+      />
     </div>
 
-    <Accordion type="single" collapsible class="w-full rounded-2xl px-4 bg-surface/50">
-      <AccordionItem
-        v-for="branch in filteredBranches"
-        :key="branch.branchId"
-        :value="branch.branchId"
-      >
-        <AccordionTrigger>{{ branch.branchName }}</AccordionTrigger>
-        <AccordionContent class="space-y-4">
-          <p>{{ branch.streetNumber }} {{ branch.streetName }}, {{ branch.city }}</p>
-          <p>{{ branch.phoneNumber }}</p>
-          <p>{{ branch.email }}</p>
+    <div class="max-h-39 overflow-y-auto">
+      <Accordion type="single" collapsible class="w-full rounded-2xl px-4 bg-surface/50">
+        <AccordionItem
+          v-for="branch in filteredBranches"
+          :key="branch.branchId"
+          :value="branch.branchId"
+        >
+          <AccordionTrigger>{{ branch.branchName }}</AccordionTrigger>
+          <AccordionContent class="space-y-2">
+            <p>{{ branch.streetNumber }} {{ branch.streetName }}, {{ branch.city }}</p>
+            <p>{{ branch.phoneNumber }}</p>
+            <p>{{ branch.email }}</p>
 
-          <Button
-            size="sm"
-            variant="secondary"
-            :class="selectedBranch === branch.branchId
-              ? 'bg-primary/70 text-primary-foreground hover:bg-primary/90'
-              : ''"
-            @click="selectBranch(branch.branchId)"
-          >
-            Select Branch
-          </Button>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+            <ul class="text-sm text-muted-foreground space-y-1">
+              <li v-for="hour in branch.businessHours" :key="hour.hoursId">
+                {{ ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][hour.dayOfWeek] }}:
+                {{ hour.openTime }} - {{ hour.closeTime }}
+              </li>
+            </ul>
+
+            <Button
+              size="sm"
+              variant="secondary"
+              :class="selectedBranch === branch.branchId
+                ? 'bg-primary/70 text-primary-foreground hover:bg-primary/90'
+                : ''"
+              @click="selectBranch(branch.branchId)"
+            >
+              Select Branch
+            </Button>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </div>
   </div>
 </template>
