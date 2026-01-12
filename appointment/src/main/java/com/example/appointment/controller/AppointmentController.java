@@ -1,5 +1,6 @@
 package com.example.appointment.controller;
 
+import com.example.appointment.dto.AppointmentAvailabilityResponse;
 import com.example.appointment.dto.AppointmentDTO;
 import com.example.appointment.dto.AppointmentUpdateDTO;
 import com.example.appointment.model.Appointment;
@@ -54,6 +55,17 @@ public class AppointmentController {
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }
+
+    @GetMapping("/availability")
+    public ResponseEntity<AppointmentAvailabilityResponse> getAvailability(
+            @RequestParam UUID branchId,
+            @RequestParam String date
+    ) {
+        return ResponseEntity.ok(
+                service.getAvailability(branchId, date)
+        );
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {

@@ -4,6 +4,8 @@ import AppointmentTimePicker from "./AppointmentTimePicker.vue"
 
 defineProps<{
   times: string[]
+  unavailableTimes: string[];
+  disabled: boolean;
   selectedTime: string | null
 }>()
 
@@ -11,6 +13,7 @@ const emit = defineEmits<{
   (e: "date-selected", date: Date): void
   (e: "update:selectedTime", time: string): void
 }>()
+
 </script>
 
 <template>
@@ -18,15 +21,18 @@ const emit = defineEmits<{
 
     <div >
       <AppointmentDatePicker
-        @date-selected="emit('date-selected', $event)"
-      />
+  @date-selected="$emit('date-selected', $event)"
+/>
+
     </div>
     <div>
       <AppointmentTimePicker
-        :times="times"
-        :model-value="selectedTime"
-        @update:model-value="emit('update:selectedTime', $event)"
-      />
+      :times="times"
+      :unavailable-times="unavailableTimes"
+      :disabled="disabled"
+      :model-value="selectedTime"
+      @update:model-value="emit('update:selectedTime', $event)"
+    />
     </div>
   </div>
 </template>

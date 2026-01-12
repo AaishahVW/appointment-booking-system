@@ -102,7 +102,7 @@ const filteredBranches = computed(() =>
                 <p class="text-low-emphasis/65 tracking-wide mb-1">Branch Hours</p>
                 <ul class="text-sm text-foreground space-y-1">
                   <li v-for="hour in branch.businessHours" :key="hour.hoursId">
-                    {{ ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][hour.dayOfWeek] }}:
+                    {{ hour.dayOfWeek.charAt(0) + hour.dayOfWeek.slice(1).toLowerCase() }}:
                     {{ hour.openTime }} - {{ hour.closeTime }}
                   </li>
                 </ul>

@@ -2,6 +2,8 @@ package com.example.appointment.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.time.DayOfWeek;
 import java.util.UUID;
 import java.time.LocalTime;
 
@@ -21,8 +23,9 @@ public class BranchBusinessHours {
     @JoinColumn(name = "branch_id")
     private Branch branch;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private int dayOfWeek;
+    private DayOfWeek dayOfWeek;
 
     @Column(nullable = false)
     private LocalTime openTime;

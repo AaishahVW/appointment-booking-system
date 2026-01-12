@@ -247,10 +247,12 @@ const confirmCancel = async () => {
         />
         <Separator />
         <AppointmentTimePicker
-          :times="availableTimes.map(t => t.startTime)"
-          :model-value="editTime"
-          @update:model-value="editTime = $event"
-        />
+  :times="availableTimes.map(t => t.startTime)"
+  :unavailable-times="[]"
+  :disabled="false"
+  :model-value="editTime"
+  @update:model-value="editTime = $event"
+/>
       </div>
       <Separator />
       <DialogFooter class="mt-4 flex justify-end gap-2">

@@ -1,15 +1,9 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue"
+import { ref, watch, onMounted, computed } from "vue"
 import BranchSelector from "./BranchSelector.vue"
 import AppointmentDateTimePicker from "./AppointmentDateTimePicker.vue"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, CheckCircle2 } from "lucide-vue-next"
@@ -43,26 +37,16 @@ const emit = defineEmits([
 ])
 
 const auth = useAuthStore()
-//test commit
+
 const alertMessage = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
-
 const availableTimes = ref<TimeSlot[]>([])
 const employees = ref<any[]>([])
 const selectedEmployee = ref<string | null>(null)
-
 const pendingPayload = ref<PendingAppointmentPayload | null>(null)
 const isBooking = ref(false)
-
-onMounted(async () => {
-  try {
-    availableTimes.value = await timeSlotsApi.getAll()
-  } catch (err) {
-    console.error(err)
-    alertMessage.value = "Failed to load available time slots."
-    clearAlertAfter()
-  }
-})
+const appointments = ref<any[]>([])
+const isDayDisabled = ref(false)
 
 const clearAlertAfter = (ms = 3000) => {
   setTimeout(() => {
@@ -71,16 +55,34 @@ const clearAlertAfter = (ms = 3000) => {
   }, ms)
 }
 
+const loadAppointments = async () => {
+  if (!auth.clientId) {
+    appointments.value = []
+    return
+  }
+  appointments.value = await appointmentsApi.getMine()
+}
+
+onMounted(async () => {
+  try {
+    availableTimes.value = await timeSlotsApi.getAll()
+  } catch {
+    alertMessage.value = "Failed to load time slots."
+    clearAlertAfter()
+  }
+  await loadAppointments()
+})
+
+watch(() => auth.clientId, loadAppointments)
+
 watch(
   () => props.selectedBranchId,
   async (branchId) => {
     if (!branchId) return
-
     try {
       employees.value = await employeesApi.getByBranch(branchId)
       selectedEmployee.value = employees.value[0]?.employeeId ?? null
-    } catch (err) {
-      console.error(err)
+    } catch {
       alertMessage.value = "Failed to load employees."
       clearAlertAfter()
     }
@@ -88,20 +90,32 @@ watch(
   { immediate: true }
 )
 
+const unavailableTimes = computed(() => {
+  if (!props.selectedBranchId || !props.selectedDate) return []
+  const date = toLocalDateString(props.selectedDate)
+  return appointments.value
+    .filter(
+      a =>
+        a.status === "BOOKED" &&
+        a.branchId === props.selectedBranchId &&
+        a.appointmentDate === date
+    )
+    .map(a => a.startTime)
+})
+
 const confirmBooking = async () => {
   if (isBooking.value) return
-  isBooking.value = true
-  alertMessage.value = null
 
-  if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime) {
+  if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime || !selectedEmployee.value) {
     alertMessage.value = "Please select a branch, date, and time."
     clearAlertAfter()
-    isBooking.value = false
     return
   }
 
+  isBooking.value = true
+
   const payload: PendingAppointmentPayload = {
-    employeeId: selectedEmployee.value!,
+    employeeId: selectedEmployee.value,
     branchId: props.selectedBranchId,
     appointmentDate: toLocalDateString(props.selectedDate),
     startTime: props.modelValueTime,
@@ -119,18 +133,18 @@ const confirmBooking = async () => {
   }
 
   try {
-    await appointmentsApi.create({
-      ...payload,
-      clientId: auth.clientId!,
-    })
-
-    successMessage.value = "Appointment booked successfully 🎉"
+    await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
+    successMessage.value = "Appointment booked successfully"
     pendingPayload.value = null
     emit("appointment-booked")
+    await loadAppointments()
     clearAlertAfter()
-  } catch (err) {
-    console.error(err)
-    alertMessage.value = "Failed to book appointment after login."
+  } catch (err: any) {
+    if (err?.response?.status === 409) {
+      alertMessage.value = "This time slot was already booked. Please choose another time."
+    } else {
+      alertMessage.value = "Failed to book appointment."
+    }
     clearAlertAfter()
   } finally {
     isBooking.value = false
@@ -140,25 +154,19 @@ const confirmBooking = async () => {
 watch(
   () => auth.isLoggedIn,
   async (loggedIn) => {
-    if (!loggedIn) return
-    if (!pendingPayload.value) return
-    if (!auth.clientId) return
-    if (isBooking.value) return
-
+    if (!loggedIn || !pendingPayload.value || !auth.clientId) return
     isBooking.value = true
-
     try {
       await appointmentsApi.create({
         ...pendingPayload.value,
         clientId: auth.clientId,
       })
-
       pendingPayload.value = null
       successMessage.value = "Appointment booked successfully 🎉"
       emit("appointment-booked")
+      await loadAppointments()
       clearAlertAfter()
-    } catch (err) {
-      console.error(err)
+    } catch {
       alertMessage.value = "Failed to book appointment."
       clearAlertAfter()
     } finally {
@@ -174,18 +182,8 @@ watch(
       <CardTitle>Book an Appointment</CardTitle>
       <CardDescription>Choose a branch, date, and time</CardDescription>
     </CardHeader>
-
     <Separator />
-
     <CardContent>
-      <Alert v-if="alertMessage" variant="error" class="mb-4 flex gap-2">
-        <AlertCircle class="h-4 w-4 mt-1" />
-        <div>
-          <AlertTitle>Notice</AlertTitle>
-          <AlertDescription>{{ alertMessage }}</AlertDescription>
-        </div>
-      </Alert>
-
       <BranchSelector
         :model-value-branch="props.selectedBranchId"
         @branch-selected="$emit('branch-selected', $event)"
@@ -193,10 +191,20 @@ watch(
 
       <AppointmentDateTimePicker
         :times="availableTimes.map(t => t.startTime)"
+        :unavailable-times="unavailableTimes"
+        :disabled="isDayDisabled"
         :selected-time="props.modelValueTime"
         @date-selected="$emit('date-selected', $event)"
         @update:selectedTime="$emit('update:modelValueTime', $event)"
       />
+
+      <Alert v-if="alertMessage" variant="error" class="mb-4 flex gap-2">
+        <AlertCircle class="h-4 w-4 mt-1" />
+        <div>
+          <AlertTitle>Notice</AlertTitle>
+          <AlertDescription>{{ alertMessage }}</AlertDescription>
+        </div>
+      </Alert>
 
       <Alert v-if="successMessage" class="mb-4 flex gap-2">
         <CheckCircle2 class="h-4 w-4 mt-1" />
@@ -209,12 +217,8 @@ watch(
       <Separator />
 
       <div class="mt-4 flex justify-between">
-        <Button variant="outline" @click="selectedEmployee = null">
-          Reset
-        </Button>
-        <Button @click="confirmBooking">
-          Confirm Booking
-        </Button>
+        <Button variant="outline" @click="selectedEmployee = null">Reset</Button>
+        <Button @click="confirmBooking">Confirm Booking</Button>
       </div>
     </CardContent>
   </Card>

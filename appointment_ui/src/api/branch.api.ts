@@ -15,7 +15,7 @@ export interface Branch {
 export interface BranchBusinessHours {
   hoursId: string;
   branch: Branch;
-  dayOfWeek: number;
+  dayOfWeek: string;
   openTime: string;
   closeTime: string;
 }
@@ -24,7 +24,7 @@ export interface BranchWithHours extends Branch {
   businessHours: {
     hoursId: string;
     branchId: string;
-    dayOfWeek: number;
+    dayOfWeek: string;
     openTime: string;
     closeTime: string;
   }[];

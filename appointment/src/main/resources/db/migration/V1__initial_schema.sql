@@ -78,7 +78,18 @@ CREATE TABLE products (
 CREATE TABLE branch_business_hours (
                                        hours_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
                                        branch_id UUID NOT NULL REFERENCES branches(branch_id),
-                                       day_of_week INT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+                                       day_of_week VARCHAR(20) NOT NULL CHECK (
+                                           day_of_week IN (
+                                                           'MONDAY',
+                                                           'TUESDAY',
+                                                           'WEDNESDAY',
+                                                           'THURSDAY',
+                                                           'FRIDAY',
+                                                           'SATURDAY',
+                                                           'SUNDAY'
+                                               )
+                                           ),
+
                                        open_time TIME NOT NULL,
                                        close_time TIME NOT NULL,
                                        UNIQUE(branch_id, day_of_week)
@@ -95,18 +106,30 @@ CREATE TABLE time_slots (
 -- Appointments table
 CREATE TABLE appointments (
                               appointment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
                               client_id UUID NOT NULL REFERENCES clients(client_id),
                               employee_id UUID NOT NULL REFERENCES employees(employee_id),
                               branch_id UUID NOT NULL REFERENCES branches(branch_id),
+
                               product_id UUID REFERENCES products(product_id),
                               case_type_id UUID REFERENCES case_types(case_type_id),
+
                               appointment_date DATE NOT NULL,
                               start_time TIME NOT NULL,
                               end_time TIME NOT NULL,
+
                               status VARCHAR(50) NOT NULL,
+
                               actual_start_time TIMESTAMP,
                               actual_end_time TIMESTAMP,
+
                               created_at TIMESTAMP NOT NULL DEFAULT NOW(),
                               updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
-                              notes TEXT
+
+                              notes TEXT,
+
+                              CONSTRAINT uq_branch_date_time
+                                  UNIQUE (branch_id, appointment_date, start_time)
+);
+
 );

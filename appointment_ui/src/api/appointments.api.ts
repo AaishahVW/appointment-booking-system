@@ -13,6 +13,12 @@ export interface CreateAppointmentPayload {
   notes?: string;
 }
 
+export interface AppointmentAvailabilityResponse {
+  date: string;
+  disabled: boolean;
+  unavailableTimes: string[];
+}
+
 export const appointmentsApi = {
   create(payload: CreateAppointmentPayload) {
     return http.post("/appointments", payload).then((res) => res.data);
@@ -22,5 +28,12 @@ export const appointmentsApi = {
   },
   update(id: string, payload: Partial<CreateAppointmentPayload>) {
     return http.put(`/appointments/${id}`, payload).then((res) => res.data);
+  },
+  getAvailability(branchId: string, date: string) {
+    return http
+      .get<AppointmentAvailabilityResponse>(`/appointments/availability`, {
+        params: { branchId, date },
+      })
+      .then((res) => res.data);
   },
 };
