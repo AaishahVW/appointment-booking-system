@@ -4,6 +4,7 @@ import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
 import { Calendar } from '@/components/ui/calendar'
 import { Label } from '@/components/ui/label'
 import { ref, type Ref } from 'vue'
+import { onMounted } from 'vue'
 
 const props = defineProps<{
   disabled?: boolean
@@ -20,8 +21,11 @@ const emit = defineEmits<{
 }>()
 
 const isDateDisabled = (d: DateValue) => {
-  const jsDate = d.toDate(getLocalTimeZone())
-  return jsDate.getDay() === 0 // Sunday
+  const js = d.toDate(getLocalTimeZone())
+  const today = new Date()
+  today.setHours(0,0,0,0)
+
+  return js < today || js.getDay() === 0
 }
 
 const onSelectDate = (d: DateValue | undefined) => {
@@ -30,6 +34,9 @@ const onSelectDate = (d: DateValue | undefined) => {
   emit('date-selected', d.toDate(getLocalTimeZone()))
 }
 
+onMounted(() => {
+  emit('date-selected', date.value.toDate(getLocalTimeZone()))
+})
 </script>
 
 <template>

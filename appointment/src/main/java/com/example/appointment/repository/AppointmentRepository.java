@@ -21,5 +21,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
             LocalDate appointmentDate,
             LocalTime startTime
     );
+    List<Appointment> findByBranch_BranchIdAndAppointmentDateAndStatus(
+            UUID branchId,
+            LocalDate appointmentDate,
+            String status
+    );
 
 }

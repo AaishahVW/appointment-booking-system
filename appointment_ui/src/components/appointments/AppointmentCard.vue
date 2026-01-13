@@ -22,6 +22,7 @@ type PendingAppointmentPayload = {
   status: "BOOKED"
 }
 
+// Props
 const props = defineProps<{
   selectedBranchId: string | null
   selectedDate: Date | null
@@ -38,16 +39,18 @@ const emit = defineEmits([
 
 const auth = useAuthStore()
 
+// State
 const alertMessage = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
-const availableTimes = ref<TimeSlot[]>([])
+const allTimeSlots = ref<TimeSlot[]>([])
 const employees = ref<any[]>([])
 const selectedEmployee = ref<string | null>(null)
+const unavailableTimes = ref<string[]>([])
+const isDayDisabled = ref(false)
 const pendingPayload = ref<PendingAppointmentPayload | null>(null)
 const isBooking = ref(false)
-const appointments = ref<any[]>([])
-const isDayDisabled = ref(false)
 
+// Helpers
 const clearAlertAfter = (ms = 3000) => {
   setTimeout(() => {
     alertMessage.value = null
@@ -55,26 +58,19 @@ const clearAlertAfter = (ms = 3000) => {
   }, ms)
 }
 
-const loadAppointments = async () => {
-  if (!auth.clientId) {
-    appointments.value = []
-    return
-  }
-  appointments.value = await appointmentsApi.getMine()
-}
+const ensureDate = (d: string | Date): Date => (d instanceof Date ? d : new Date(d))
 
+// Load time slots on mount
 onMounted(async () => {
   try {
-    availableTimes.value = await timeSlotsApi.getAll()
+    allTimeSlots.value = await timeSlotsApi.getAll()
   } catch {
     alertMessage.value = "Failed to load time slots."
     clearAlertAfter()
   }
-  await loadAppointments()
 })
 
-watch(() => auth.clientId, loadAppointments)
-
+// Watch selected branch and load employees
 watch(
   () => props.selectedBranchId,
   async (branchId) => {
@@ -90,23 +86,59 @@ watch(
   { immediate: true }
 )
 
-const unavailableTimes = computed(() => {
-  if (!props.selectedBranchId || !props.selectedDate) return []
-  const date = toLocalDateString(props.selectedDate)
-  return appointments.value
-    .filter(
-      a =>
-        a.status === "BOOKED" &&
-        a.branchId === props.selectedBranchId &&
-        a.appointmentDate === date
-    )
-    .map(a => a.startTime)
+// Watch selected branch/date and load availability
+watch(
+  () => [props.selectedBranchId, props.selectedDate],
+  async ([branchId, date]) => {
+    if (!branchId || !date) return
+const branchIdStr = branchId as string
+const localDate = toLocalDateString(ensureDate(date))
+const availability = await appointmentsApi.getAvailability(branchIdStr, localDate)
+
+
+    unavailableTimes.value = []
+    isDayDisabled.value = false
+
+  
+
+    isDayDisabled.value = availability.disabled
+    unavailableTimes.value = availability.unavailableTimes
+  },
+  { immediate: true }
+)
+
+// Computed: available times
+const availableTimes = computed(() => {
+  if (!props.selectedDate) return []
+
+  const now = new Date()
+  const isToday = toLocalDateString(ensureDate(props.selectedDate)) === toLocalDateString(now)
+
+  return allTimeSlots.value
+    .map(t => t.startTime)
+    .filter(time => {
+      if (unavailableTimes.value.includes(time)) return false
+      if (!isToday) return true
+
+      const [hStr, mStr] = time.split(":")
+      if (!hStr || !mStr) return false
+
+      const slot = new Date()
+      slot.setHours(Number(hStr), Number(mStr), 0, 0)
+      return slot > now
+    })
 })
 
+// Booking
 const confirmBooking = async () => {
   if (isBooking.value) return
 
-  if (!props.selectedBranchId || !props.selectedDate || !props.modelValueTime || !selectedEmployee.value) {
+  if (
+    !props.selectedBranchId ||
+    !props.selectedDate ||
+    !props.modelValueTime ||
+    !selectedEmployee.value
+  ) {
     alertMessage.value = "Please select a branch, date, and time."
     clearAlertAfter()
     return
@@ -117,7 +149,7 @@ const confirmBooking = async () => {
   const payload: PendingAppointmentPayload = {
     employeeId: selectedEmployee.value,
     branchId: props.selectedBranchId,
-    appointmentDate: toLocalDateString(props.selectedDate),
+    appointmentDate: toLocalDateString(ensureDate(props.selectedDate)),
     startTime: props.modelValueTime,
     endTime: props.modelValueTime,
     status: "BOOKED",
@@ -126,8 +158,6 @@ const confirmBooking = async () => {
   if (!auth.isLoggedIn) {
     pendingPayload.value = payload
     emit("login-required")
-    alertMessage.value = "Please log in to confirm your appointment."
-    clearAlertAfter()
     isBooking.value = false
     return
   }
@@ -137,11 +167,11 @@ const confirmBooking = async () => {
     successMessage.value = "Appointment booked successfully"
     pendingPayload.value = null
     emit("appointment-booked")
-    await loadAppointments()
     clearAlertAfter()
   } catch (err: any) {
     if (err?.response?.status === 409) {
-      alertMessage.value = "This time slot was already booked. Please choose another time."
+      alertMessage.value =
+        "This time slot was already booked. Please choose another time."
     } else {
       alertMessage.value = "Failed to book appointment."
     }
@@ -151,6 +181,7 @@ const confirmBooking = async () => {
   }
 }
 
+// Auto-book pending after login
 watch(
   () => auth.isLoggedIn,
   async (loggedIn) => {
@@ -164,7 +195,6 @@ watch(
       pendingPayload.value = null
       successMessage.value = "Appointment booked successfully 🎉"
       emit("appointment-booked")
-      await loadAppointments()
       clearAlertAfter()
     } catch {
       alertMessage.value = "Failed to book appointment."
@@ -190,7 +220,7 @@ watch(
       />
 
       <AppointmentDateTimePicker
-        :times="availableTimes.map(t => t.startTime)"
+        :times="availableTimes"
         :unavailable-times="unavailableTimes"
         :disabled="isDayDisabled"
         :selected-time="props.modelValueTime"

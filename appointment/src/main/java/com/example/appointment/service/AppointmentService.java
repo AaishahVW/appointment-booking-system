@@ -104,13 +104,17 @@ public class AppointmentService {
 
         LocalDate localDate = LocalDate.parse(date);
 
+        // Disable past dates
+        if (localDate.isBefore(LocalDate.now())) {
+            return new AppointmentAvailabilityResponse(
+                    date, true, null, null, List.of()
+            );
+        }
+
+        // Disable Sundays
         if (localDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
             return new AppointmentAvailabilityResponse(
-                    date,
-                    true,
-                    null,
-                    null,
-                    List.of()
+                    date, true, null, null, List.of()
             );
         }
 
@@ -121,31 +125,28 @@ public class AppointmentService {
 
         if (hours == null) {
             return new AppointmentAvailabilityResponse(
-                    date,
-                    true,
-                    null,
-                    null,
-                    List.of()
+                    date, true, null, null, List.of()
             );
         }
 
-        LocalTime open = hours.getOpenTime();
-        LocalTime close = hours.getCloseTime();
+        List<Appointment> booked =
+                repository.findByBranch_BranchIdAndAppointmentDateAndStatus(
+                        branchId,
+                        localDate,
+                        "BOOKED"
+                );
 
-        List<Appointment> appointments =
-                repository.findByBranch_BranchIdAndAppointmentDate(branchId, localDate);
-
-        List<LocalTime> unavailableTimes =
-                appointments.stream()
+        List<LocalTime> unavailable =
+                booked.stream()
                         .map(Appointment::getStartTime)
                         .toList();
 
         return new AppointmentAvailabilityResponse(
                 date,
                 false,
-                open,
-                close,
-                unavailableTimes
+                hours.getOpenTime(),
+                hours.getCloseTime(),
+                unavailable
         );
     }
 

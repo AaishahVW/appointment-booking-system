@@ -47,6 +47,14 @@ const auth = useAuthStore()
 const appointments = ref<any[]>([])
 const isLoading = ref(false)
 const availableTimes = ref<TimeSlot[]>([])
+const unavailableTimes = ref<string[]>([])
+const ensureDate = (d: string | Date): Date => (d instanceof Date ? d : new Date(d))
+const isDayDisabled = ref(false)
+
+const props = defineProps<{
+  selectedBranchId: string | null
+  selectedDate: Date | null
+}>()
 
 const loadAppointments = async () => {
   if (!auth.clientId) {
@@ -150,13 +158,38 @@ const closeCancel = () => {
 const confirmCancel = async () => {
   if (!canceling.value) return
   cancelingBusy.value = true
+
   await appointmentsApi.update(canceling.value.appointmentId, {
     status: "CANCELLED",
   })
+
+  // Reload appointments
   await loadAppointments()
+
+  // Refresh availability for the selected branch/date
+  if (props.selectedBranchId && props.selectedDate) {
+    const localDate = toLocalDateString(ensureDate(props.selectedDate))
+    const availability = await appointmentsApi.getAvailability(props.selectedBranchId, localDate)
+    unavailableTimes.value = availability.unavailableTimes
+    isDayDisabled.value = availability.disabled
+  }
+
   closeCancel()
   cancelingBusy.value = false
 }
+
+
+watch(editDate, async (date) => {
+  if (!date || !editing.value?.branch?.branchId) return
+
+  const availability = await appointmentsApi.getAvailability(
+    editing.value.branch.branchId,
+    toLocalDateString(date)
+  )
+
+  unavailableTimes.value = availability.unavailableTimes
+})
+
 </script>
 
 <template>
@@ -248,7 +281,7 @@ const confirmCancel = async () => {
         <Separator />
         <AppointmentTimePicker
   :times="availableTimes.map(t => t.startTime)"
-  :unavailable-times="[]"
+  :unavailable-times="unavailableTimes"
   :disabled="false"
   :model-value="editTime"
   @update:model-value="editTime = $event"
