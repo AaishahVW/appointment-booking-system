@@ -23,7 +23,7 @@ const forwardedProps = useForwardProps(delegatedProps)
     data-slot="calendar-cell-trigger"
     :class="cn(
   buttonVariants({ variant: 'ghost' }),
-  'w-9 h-9 sm:w-10 sm:h-10 font-normal aria-selected:opacity-100',
+  'w-5 h-5 sm:w-10 sm:h-10 font-normal aria-selected:opacity-100',
   '[&[data-today]:not([data-selected])]:bg-secondary [&[data-today]:not([data-selected])]:text-on-secondary',
   'data-selected:bg-primary data-selected:text-on-primary',
   'data-disabled:text-low-emphasis data-disabled:opacity-50',
