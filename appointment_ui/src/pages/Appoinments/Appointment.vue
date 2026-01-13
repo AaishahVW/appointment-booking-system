@@ -37,7 +37,13 @@ const reloadAppointments = () => tableRef.value?.reload()
           @login-required="openLogin"
         />
 
-        <AppointmentTable v-if="auth.isLoggedIn" ref="tableRef" />
+        <AppointmentTable
+  v-if="auth.isLoggedIn"
+  ref="tableRef"
+  :selectedBranchId="selectedBranchId"
+  :selectedDate="selectedDate"
+/>
+
       </div>
     </div>
 

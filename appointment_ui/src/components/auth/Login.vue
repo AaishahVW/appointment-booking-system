@@ -51,7 +51,7 @@ const handleLogin = async () => {
 
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div class="space-y-1">
-          <Label for="username">Username</Label>
+          <Label for="username">ID Number</Label>
           <Input id="username" v-model="username" required />
         </div>
 
