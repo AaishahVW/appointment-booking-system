@@ -27,7 +27,7 @@ const reloadAppointments = () => tableRef.value?.reload()
     <div class="relative z-10 mx-auto max-w-8xl px-6 pt-10">
       <div class="flex flex-col gap-8">
         <AppointmentCard
-          :selectedBranchId="selectedBranchId"
+          :selectedBranchId="selectedBranchId!"
           :selectedDate="selectedDate"
           :model-value-time="selectedTime"
           @branch-selected="selectedBranchId = $event"
