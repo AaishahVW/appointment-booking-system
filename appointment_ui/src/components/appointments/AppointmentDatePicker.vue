@@ -44,7 +44,7 @@ onMounted(() => {
     <Label class="py-3">Select Date</Label>
 
     <Label class="bg-surface/50 rounded-md px-3 py-3">
-      {{ df.format(date.toDate(getLocalTimeZone())) }}
+      {{ date?.toDate ? df.format(date.toDate(getLocalTimeZone())) : '' }}
     </Label>
 
     <Calendar
