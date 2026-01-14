@@ -69,15 +69,22 @@ onMounted(async () => {
     clearAlertAfter()
   }
 })
+const branchEmployeeIndex = ref<Record<string, number>>({})
 
-// Watch selected branch and load employees
 watch(
   () => props.selectedBranchId,
   async (branchId) => {
     if (!branchId) return
     try {
       employees.value = await employeesApi.getByBranch(branchId)
-      selectedEmployee.value = employees.value[0]?.employeeId ?? null
+
+      // Initialize rotation index if not present
+      if (!(branchId in branchEmployeeIndex.value)) {
+        branchEmployeeIndex.value[branchId] = 0
+      }
+
+      const idx = branchEmployeeIndex.value[branchId] ?? 0
+      selectedEmployee.value = employees.value[idx]?.employeeId ?? null
     } catch {
       alertMessage.value = "Failed to load employees."
       clearAlertAfter()
@@ -85,6 +92,7 @@ watch(
   },
   { immediate: true }
 )
+
 
 // Watch selected branch/date and load availability
 watch(
@@ -136,19 +144,37 @@ const confirmBooking = async () => {
   if (
     !props.selectedBranchId ||
     !props.selectedDate ||
-    !props.modelValueTime ||
-    !selectedEmployee.value
+    !props.modelValueTime
   ) {
     alertMessage.value = "Please select a branch, date, and time."
     clearAlertAfter()
     return
   }
 
+  if (employees.value.length === 0) {
+    alertMessage.value = "No employees available for this branch."
+    clearAlertAfter()
+    return
+  }
+
   isBooking.value = true
 
+const branchId = props.selectedBranchId!
+let idx = branchEmployeeIndex.value[branchId] ?? 0
+const employee = employees.value[idx]
+
+if (!employee) {
+  alertMessage.value = "No valid employee found for this branch."
+  clearAlertAfter()
+  isBooking.value = false
+  return
+}
+
+selectedEmployee.value = employee.employeeId
+
   const payload: PendingAppointmentPayload = {
-    employeeId: selectedEmployee.value,
-    branchId: props.selectedBranchId,
+    employeeId: selectedEmployee.value!,
+    branchId,
     appointmentDate: toLocalDateString(ensureDate(props.selectedDate)),
     startTime: props.modelValueTime,
     endTime: props.modelValueTime,
@@ -164,10 +190,13 @@ const confirmBooking = async () => {
 
   try {
     await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
-    successMessage.value = "Appointment booked successfully"
+    successMessage.value = "Appointment booked successfully 🎉"
     pendingPayload.value = null
     emit("appointment-booked")
     clearAlertAfter()
+
+    // ✅ Advance the index for **next round-robin booking** for this branch
+    branchEmployeeIndex.value[branchId] = (idx + 1) % employees.value.length
   } catch (err: any) {
     if (err?.response?.status === 409) {
       alertMessage.value =
@@ -180,6 +209,7 @@ const confirmBooking = async () => {
     isBooking.value = false
   }
 }
+
 
 // Auto-book pending after login
 watch(

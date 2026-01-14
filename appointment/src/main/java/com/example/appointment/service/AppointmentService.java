@@ -7,9 +7,11 @@ import com.example.appointment.exception.SlotAlreadyBookedException;
 import com.example.appointment.model.Appointment;
 import com.example.appointment.model.Branch;
 import com.example.appointment.model.BranchBusinessHours;
+import com.example.appointment.model.Employee;
 import com.example.appointment.repository.AppointmentRepository;
 import com.example.appointment.repository.BranchBusinessHoursRepository;
 import com.example.appointment.repository.BranchRepository;
+import com.example.appointment.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,17 +33,25 @@ public class AppointmentService {
     private final AppointmentRepository repository;
     private final BranchRepository branchRepository;
     private final BranchBusinessHoursRepository businessHoursRepository;
-
+private final EmployeeRepository employeeRepository;
 
     @Transactional
     public Appointment create(AppointmentDTO dto) {
-
         Branch branch = branchRepository.findById(dto.getBranchId())
                 .orElseThrow(() -> new RuntimeException("Branch not found"));
 
+        Employee employee = null;
+
+        if (dto.getEmployeeId() != null) {
+            employee = employeeRepository
+                    .findByEmployeeIdAndBranch_BranchIdAndIsActiveTrue(dto.getEmployeeId(), branch.getBranchId())
+                    .orElseThrow(() -> new RuntimeException("Employee does not belong to selected branch"));
+        }
+
+
         Appointment appointment = Appointment.builder()
                 .clientId(dto.getClientId())
-                .employeeId(dto.getEmployeeId())
+                .employeeId(employee != null ? employee.getEmployeeId() : null)
                 .branch(branch)
                 .productId(dto.getProductId())
                 .caseTypeId(dto.getCaseTypeId())
@@ -60,6 +70,9 @@ public class AppointmentService {
             throw new SlotAlreadyBookedException();
         }
     }
+
+
+
 
     public Appointment getById(UUID id) {
         return repository.findById(id)

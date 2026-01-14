@@ -35,6 +35,11 @@ public class EmployeeService {
         return employeeRepository.findAll();
     }
 
+    public List<Employee> getByBranch(UUID branchId) {
+        return employeeRepository
+                .findByBranch_BranchIdAndIsActiveTrueOrderByCreatedAtAsc(branchId);
+    }
+
     public Employee update(UUID id, Employee update) {
         Employee employee = getById(id);
         employee.setCpNumber(update.getCpNumber());
