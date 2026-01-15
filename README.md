@@ -1,13 +1,4 @@
 <a id="readme-top"></a>
-
-<!-- PROJECT SHIELDS -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![Unlicense License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
@@ -16,14 +7,6 @@
   <p align="center">
     A system that allows Capitec clients to conveniently book appointments at any branch.
     <br />
-    <a href="#about-the-project"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="#usage">View Demo</a>
-    ·
-    <a href="#roadmap">Roadmap</a>
-    ·
-    <a href="#contributing">Contribute</a>
   </p>
 </div>
 
@@ -67,9 +50,9 @@ This project demonstrates both frontend and backend integration with a focus on 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
-* [![Vue][Vue.js]][Vue-url]
-* [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-* [VSCode](https://code.visualstudio.com/)
+* [![Vue][Vue.ts]][Vue-url]
+* [![Vite][Vite.ts]][Vite-url]
+* [VSCode][]]
 * [Shadcn](https://ui.shadcn.com/)
 * [IntelliJ IDEA](https://www.jetbrains.com/idea/)
 * [Spring Boot](https://spring.io/projects/spring-boot)
