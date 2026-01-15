@@ -34,12 +34,8 @@ public class EmployeeController {
 
     @GetMapping(params = "branchId")
     public ResponseEntity<List<Employee>> getByBranch(@RequestParam UUID branchId) {
-        return ResponseEntity.ok(
-                employeeService.getByBranch(branchId)
-        );
+        return ResponseEntity.ok(employeeService.getByBranch(branchId));
     }
-
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Employee> update(@PathVariable UUID id, @RequestBody Employee employee) {

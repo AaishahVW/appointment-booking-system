@@ -7,11 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.time.DayOfWeek;
 import java.util.Optional;
 import java.util.UUID;
+
 @Repository
 public interface BranchBusinessHoursRepository extends JpaRepository<BranchBusinessHours, UUID> {
-    Optional<BranchBusinessHours> findByBranch_BranchIdAndDayOfWeek(
-            UUID branchId,
-            DayOfWeek dayOfWeek
-    );
-
+    Optional<BranchBusinessHours> findByBranch_BranchIdAndDayOfWeek(UUID branchId, DayOfWeek dayOfWeek);
 }

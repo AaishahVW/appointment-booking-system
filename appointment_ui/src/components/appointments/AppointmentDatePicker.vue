@@ -11,9 +11,7 @@ const props = defineProps<{
 }>()
 
 const defaultPlaceholder = today(getLocalTimeZone())
-
 const date = ref(defaultPlaceholder) as Ref<DateValue>
-
 const df = new DateFormatter('en-US', { dateStyle: 'long' })
 
 const emit = defineEmits<{

@@ -12,7 +12,9 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class AuthService {
     private final CredentialRepository credentialRepository;
     private final ClientRepository clientRepository;
     private final JwtService jwtService;
+
     private Map<String, Object> buildAuthResponse(User user, Client client) {
         String token = jwtService.generateToken(user.getUserId(), client.getClientId());
 

@@ -48,8 +48,7 @@ const appointments = ref<any[]>([])
 const isLoading = ref(false)
 const availableTimes = ref<TimeSlot[]>([])
 const unavailableTimes = ref<string[]>([])
-const ensureDate = (d: string | Date): Date => (d instanceof Date ? d : new Date(d))
-const isDayDisabled = ref(false)
+const emit = defineEmits(["appointment-cancelled"])
 
 const props = defineProps<{
   selectedBranchId: string | null
@@ -163,21 +162,12 @@ const confirmCancel = async () => {
     status: "CANCELLED",
   })
 
-  // Reload appointments
+  emit("appointment-cancelled")
+
   await loadAppointments()
-
-  // Refresh availability for the selected branch/date
-  if (props.selectedBranchId && props.selectedDate) {
-    const localDate = toLocalDateString(ensureDate(props.selectedDate))
-    const availability = await appointmentsApi.getAvailability(props.selectedBranchId, localDate)
-    unavailableTimes.value = availability.unavailableTimes
-    isDayDisabled.value = availability.disabled
-  }
-
   closeCancel()
   cancelingBusy.value = false
 }
-
 
 watch(editDate, async (date) => {
   if (!date || !editing.value?.branch?.branchId) return

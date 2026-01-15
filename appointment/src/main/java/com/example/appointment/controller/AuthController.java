@@ -1,8 +1,5 @@
 package com.example.appointment.controller;
 
-import com.example.appointment.model.Client;
-import com.example.appointment.model.Credential;
-import com.example.appointment.model.User;
 import com.example.appointment.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

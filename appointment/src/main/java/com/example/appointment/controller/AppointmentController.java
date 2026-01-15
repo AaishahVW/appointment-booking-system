@@ -31,7 +31,6 @@ public class AppointmentController {
         return ResponseEntity.ok(service.create(dto));
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Appointment> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.getById(id));

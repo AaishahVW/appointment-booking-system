@@ -2,8 +2,8 @@ package com.example.appointment.service;
 
 import com.example.appointment.model.Product;
 import com.example.appointment.model.ProductCategory;
-import com.example.appointment.repository.ProductRepository;
 import com.example.appointment.repository.ProductCategoryRepository;
+import com.example.appointment.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

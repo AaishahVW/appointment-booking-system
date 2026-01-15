@@ -15,9 +15,7 @@ import com.example.appointment.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -33,7 +31,7 @@ public class AppointmentService {
     private final AppointmentRepository repository;
     private final BranchRepository branchRepository;
     private final BranchBusinessHoursRepository businessHoursRepository;
-private final EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Transactional
     public Appointment create(AppointmentDTO dto) {
@@ -72,8 +70,6 @@ private final EmployeeRepository employeeRepository;
     }
 
 
-
-
     public Appointment getById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -82,6 +78,7 @@ private final EmployeeRepository employeeRepository;
     public List<Appointment> getAll() {
         return repository.findAll();
     }
+
     public List<Appointment> getByClientId(UUID clientId) {
         return repository.findByClientId(clientId);
     }

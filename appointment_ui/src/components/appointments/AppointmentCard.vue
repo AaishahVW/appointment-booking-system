@@ -22,12 +22,18 @@ type PendingAppointmentPayload = {
   status: "BOOKED"
 }
 
-// Props
 const props = defineProps<{
   selectedBranchId: string | null
   selectedDate: Date | null
   modelValueTime: string | null
+  refreshKey: number
 }>()
+watch(
+  () => props.refreshKey,
+  async () => {
+    await refreshAvailability()
+  }
+)
 
 const emit = defineEmits([
   "branch-selected",
@@ -38,8 +44,6 @@ const emit = defineEmits([
 ])
 
 const auth = useAuthStore()
-
-// State
 const alertMessage = ref<string | null>(null)
 const successMessage = ref<string | null>(null)
 const allTimeSlots = ref<TimeSlot[]>([])
@@ -50,7 +54,6 @@ const isDayDisabled = ref(false)
 const pendingPayload = ref<PendingAppointmentPayload | null>(null)
 const isBooking = ref(false)
 
-// Helpers
 const clearAlertAfter = (ms = 3000) => {
   setTimeout(() => {
     alertMessage.value = null
@@ -60,7 +63,6 @@ const clearAlertAfter = (ms = 3000) => {
 
 const ensureDate = (d: string | Date): Date => (d instanceof Date ? d : new Date(d))
 
-// Load time slots on mount
 onMounted(async () => {
   try {
     allTimeSlots.value = await timeSlotsApi.getAll()
@@ -78,7 +80,6 @@ watch(
     try {
       employees.value = await employeesApi.getByBranch(branchId)
 
-      // Initialize rotation index if not present
       if (!(branchId in branchEmployeeIndex.value)) {
         branchEmployeeIndex.value[branchId] = 0
       }
@@ -93,8 +94,6 @@ watch(
   { immediate: true }
 )
 
-
-// Watch selected branch/date and load availability
 watch(
   () => [props.selectedBranchId, props.selectedDate],
   async ([branchId, date]) => {
@@ -107,15 +106,12 @@ const availability = await appointmentsApi.getAvailability(branchIdStr, localDat
     unavailableTimes.value = []
     isDayDisabled.value = false
 
-  
-
     isDayDisabled.value = availability.disabled
     unavailableTimes.value = availability.unavailableTimes
   },
   { immediate: true }
 )
 
-// Computed: available times
 const availableTimes = computed(() => {
   if (!props.selectedDate) return []
 
@@ -137,7 +133,18 @@ const availableTimes = computed(() => {
     })
 })
 
-// Booking
+const refreshAvailability = async () => {
+  if (!props.selectedBranchId || !props.selectedDate) return
+
+  const availability = await appointmentsApi.getAvailability(
+    props.selectedBranchId,
+    toLocalDateString(ensureDate(props.selectedDate))
+  )
+
+  unavailableTimes.value = availability.unavailableTimes
+  isDayDisabled.value = availability.disabled
+}
+
 const confirmBooking = async () => {
   if (isBooking.value) return
 
@@ -192,10 +199,10 @@ selectedEmployee.value = employee.employeeId
     await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
     successMessage.value = "Appointment booked successfully 🎉"
     pendingPayload.value = null
+    await refreshAvailability()
     emit("appointment-booked")
     clearAlertAfter()
 
-    // ✅ Advance the index for **next round-robin booking** for this branch
     branchEmployeeIndex.value[branchId] = (idx + 1) % employees.value.length
   } catch (err: any) {
     if (err?.response?.status === 409) {
@@ -210,20 +217,21 @@ selectedEmployee.value = employee.employeeId
   }
 }
 
-
-// Auto-book pending after login
 watch(
   () => auth.isLoggedIn,
   async (loggedIn) => {
     if (!loggedIn || !pendingPayload.value || !auth.clientId) return
+
     isBooking.value = true
     try {
       await appointmentsApi.create({
         ...pendingPayload.value,
         clientId: auth.clientId,
       })
+
       pendingPayload.value = null
       successMessage.value = "Appointment booked successfully 🎉"
+      await refreshAvailability()
       emit("appointment-booked")
       clearAlertAfter()
     } catch {
@@ -234,6 +242,7 @@ watch(
     }
   }
 )
+
 </script>
 
 <template>
