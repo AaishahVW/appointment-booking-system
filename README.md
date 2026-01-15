@@ -50,8 +50,8 @@ This project demonstrates both frontend and backend integration with a focus on 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
-* [![Vue][Vue.ts]][Vue-url]
-* [![Vite][Vite.ts]][Vite-url]
+* [![Vue][Vue.js]][Vue-url]
+* [![Vite][Vite.js]][Vite-url]
 * [VSCode][]]
 * [Shadcn](https://ui.shadcn.com/)
 * [IntelliJ IDEA](https://www.jetbrains.com/idea/)
