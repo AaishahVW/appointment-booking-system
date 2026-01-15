@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { cn } from '@/lib/utils'
 import { reactiveOmit } from '@vueuse/core'
-import { Primitive, PrimitiveProps, useForwardProps } from 'reka-ui'
+import { Primitive, type PrimitiveProps, useForwardProps } from 'reka-ui'
 import type { HTMLAttributes } from 'vue'
 import { buttonVariants } from '../button'
 
@@ -18,7 +18,7 @@ const forwardedProps = useForwardProps(delegatedProps)
   <Primitive
     data-slot="alert-action"
     :class="cn(
-      buttonVariants({ variant: 'text', size: 'sm' }),
+      buttonVariants({ variant: 'link', size: 'sm' }),
       'px-0! hover:bg-transparent cursor-pointer',
       props.class
     )"
