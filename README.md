@@ -27,7 +27,7 @@
     <li><a href="#usage">Usage</a></li>
     <li><a href="#testing">Testing</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contribution">Contributions</a></li>
+    <li><a href="#contributions">Contributions</a></li>
     <li><a href="#contact">Contact</a></li>
   </ol>
 </details>

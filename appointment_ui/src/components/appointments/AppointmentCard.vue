@@ -197,7 +197,7 @@ selectedEmployee.value = employee.employeeId
 
   try {
     await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
-    successMessage.value = "Appointment booked successfully 🎉"
+    successMessage.value = "Appointment booked successfully. Check all booking made in the table below!"
     pendingPayload.value = null
     await refreshAvailability()
     emit("appointment-booked")
@@ -286,7 +286,6 @@ watch(
       <Separator />
 
       <div class="mt-4 flex justify-between">
-        <Button variant="outline" @click="selectedEmployee = null">Reset</Button>
         <Button @click="confirmBooking">Confirm Booking</Button>
       </div>
     </CardContent>
