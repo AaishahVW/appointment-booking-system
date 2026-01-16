@@ -72,20 +72,22 @@ This project demonstrates both frontend and backend integration with a focus on 
 Follow these steps to set up the project locally.
 
 ### Prerequisites
+- IDE Terminal or CMD Prompt
+
 - [Node.js & npm](https://nodejs.org/)  
 
-  ```sh
-  npm install npm@latest -g
-  ```
+```sh
+npm install npm@latest -g
+```
 - [Docker: Rancher Desktop for docker daemon. Can run in the background.](https://rancherdesktop.io/)
 
 - Optional: Any IDE (VSCode, IntelliJ Ultimate, etc.) - for contributions
 
-- IDE Terminal or CMD Prompt
-
 ### Installation
 
-- Clone the repo:
+- Note: There are 2 ways to run this project
+
+- Navigate to a location of your choice and clone the repo:
 
 ```sh
 git clone https://github.com/AaishahVanWitt_capitec/appointment-booking-system.git
@@ -106,7 +108,7 @@ chmod +x start.sh
 docker-compose up --build
 ```
 
-Access the frontend via the URL provided in your terminal or through Rancher Desktop → Containers → frontend service.
+Access the frontend through Rancher Desktop → Containers → appointment-frontend → port [5173:80](http://localhost:5173).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
