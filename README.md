@@ -108,7 +108,7 @@ chmod +x start.sh
 docker-compose up --build
 ```
 
-Access the frontend through Rancher Desktop → Containers → appointment-frontend → port [5173:80](http://localhost:5173).
+Access the frontend through Rancher Desktop → Containers → appointment-frontend → port [5173:5173](http://localhost:5173).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
