@@ -340,7 +340,9 @@ VALUES
 -- TIME SLOTS (5 total)
 -- ========================
 INSERT INTO time_slots (slot_id, start_time, end_time, slot_label)
-VALUES (gen_random_uuid(), '09:00', '10:00', 'Morning Slot'),
+VALUES
+    (gen_random_uuid(), '08:00', '09:00', 'Morning Slot'),
+    (gen_random_uuid(), '09:00', '10:00', 'Morning Slot'),
        (gen_random_uuid(), '10:00', '11:00', 'Late Morning'),
        (gen_random_uuid(), '11:00', '12:00', 'Noon Slot'),
        -- Note: 12:00 - 13:00 typically reserved for lunch
