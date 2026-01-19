@@ -301,14 +301,16 @@ watch(
         @branch-selected="$emit('branch-selected', $event)"
       />
 
-      <AppointmentDateTimePicker
-        :times="availableTimes"
-        :unavailable-times="unavailableTimes"
-        :disabled="isDayDisabled"
-        :selected-time="props.modelValueTime"
-        @date-selected="$emit('date-selected', $event)"
-        @update:selectedTime="$emit('update:modelValueTime', $event)"
-      />
+      <div v-if="props.selectedBranchId">
+    <AppointmentDateTimePicker
+      :times="availableTimes"
+      :unavailable-times="unavailableTimes"
+      :disabled="isDayDisabled"
+      :selected-time="props.modelValueTime"
+      @date-selected="$emit('date-selected', $event)"
+      @update:selectedTime="$emit('update:modelValueTime', $event)"
+    />
+  </div>
 
       <Alert v-if="alertMessage" variant="error" class="mb-4 flex gap-2">
         <AlertCircle class="h-4 w-4 mt-1" />
