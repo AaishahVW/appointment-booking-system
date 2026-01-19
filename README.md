@@ -90,7 +90,7 @@ npm install npm@latest -g
 - Navigate to a location of your choice and clone the repo:
 
 ```sh
-git clone https://github.com/AaishahVanWitt_capitec/appointment-booking-system.git
+git clone https://github.com/AaishahVW/appointment-booking-system.git
 ```
 
 - Navigate to the project directory.
@@ -153,6 +153,6 @@ Contributions are welcome!
 
 ## Contact
 Aaishah Van Witt: aaishahvanwitt@capitecbank.co.za
-Project Link: https://github.com/AaishahVanWitt_capitec/appointment-booking-system
+Project Link: [https://github.com/AaishahVanWitt_capitec/appointment-booking-system](https://github.com/AaishahVW/appointment-booking-system)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
