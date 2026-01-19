@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { useAuthStore } from "@/stores/auth.store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardHeader,
@@ -13,6 +12,7 @@ import {
   CardFooter,
 } from "@/components/ui/card"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Eye, EyeOff } from "lucide-vue-next"
 
 const emit = defineEmits<{
   (e: "signup"): void
@@ -20,9 +20,20 @@ const emit = defineEmits<{
 }>()
 
 const auth = useAuthStore()
+
 const username = ref("")
 const password = ref("")
+const showPassword = ref(false)
 const errorMessage = ref<string | null>(null)
+
+const digitsOnlyInput = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  input.value = input.value.replace(/\D+/g, "")
+}
+
+const isUsernameValid = computed(() =>
+  /^\d{9,13}$/.test(username.value)
+)
 
 const handleLogin = async () => {
   const success = await auth.login(username.value, password.value)
@@ -50,22 +61,52 @@ const handleLogin = async () => {
       </Alert>
 
       <form @submit.prevent="handleLogin" class="space-y-4">
-        <div class="space-y-1">
-          <Label for="username">ID Number</Label>
-          <Input id="username" v-model="username" required />
+        <div class="space-y-2">
+          <Input
+            v-model="username"
+            placeholder="ID Number"
+            maxlength="13"
+            inputmode="numeric"
+            @input="digitsOnlyInput"
+            :class="username && !isUsernameValid ? 'border-error' : ''"
+          />
+          <p v-if="username && !isUsernameValid" class="text-xs text-error">
+            ID number must be between 9 and 13 digits
+          </p>
         </div>
 
-        <div class="space-y-1">
-          <Label for="password">Password</Label>
-          <Input id="password" type="password" v-model="password" required />
+        <div class="space-y-2">
+          <div class="relative">
+            <Input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="Password"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-4"
+              @click="showPassword = !showPassword"
+            >
+              <Eye
+                v-if="!showPassword"
+                class="h-5 w-5 text-primary"
+              />
+              <EyeOff
+                v-else
+                class="h-5 w-5 text-primary"
+              />
+            </button>
+          </div>
         </div>
 
-        <Button type="submit" class="w-full">Log In</Button>
+        <Button type="submit" class="w-full" :disabled="!isUsernameValid">
+          Log In
+        </Button>
       </form>
     </CardContent>
 
-    <CardFooter class="flex justify-center">
-      <Button variant="link" type="button" @click="$emit('signup')">
+    <CardFooter class="justify-center">
+      <Button variant="link" @click="$emit('signup')">
         Don’t have an account? Sign up
       </Button>
     </CardFooter>

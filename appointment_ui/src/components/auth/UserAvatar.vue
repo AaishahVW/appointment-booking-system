@@ -32,7 +32,6 @@ const handleLogout = () => {
       <span class="text-sm text-foreground">Sign in</span>
     </Button>
 
-    <!-- Logged in -->
     <DropdownMenu v-else>
       <DropdownMenuTrigger asChild>
         <Button class="flex items-center gap-2 rounded-md px-2 py-1 hover:bg-muted transition z-50 bg-transparent">

@@ -55,6 +55,26 @@ const props = defineProps<{
   selectedDate: Date | null
 }>()
 
+const formatReadableDate = (dateStr: string) => {
+  const d = new Date(dateStr)
+  return d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  }).toUpperCase()
+}
+
+const formatReadableTime = (time: string) => {
+  const [h, m] = time.split(':').map(Number)
+  const d = new Date()
+  d.setHours(h, m, 0, 0)
+  return d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: m === 0 ? undefined : '2-digit',
+    hour12: true
+  })
+}
+
 const loadAppointments = async () => {
   if (!auth.clientId) {
     appointments.value = []
@@ -206,8 +226,8 @@ watch(editDate, async (date) => {
             class="hover:bg-muted/40 transition"
           >
             <TableCell>{{ a.branch?.branchName ?? "Unknown" }}</TableCell>
-            <TableCell>{{ a.appointmentDate }}</TableCell>
-            <TableCell>{{ a.startTime }}</TableCell>
+            <TableCell>{{ formatReadableDate(a.appointmentDate) }}</TableCell>
+            <TableCell>{{ formatReadableTime(a.startTime) }}</TableCell>
             <TableCell>
               <span class="rounded-full px-2 py-1 text-xs border">
                 {{ a.status }}
@@ -256,12 +276,12 @@ watch(editDate, async (date) => {
       </DialogHeader>
       <div class="flex flex-col gap-2">
         <div class="p-2 rounded-md bg-primary-inverse/50">
-          <p><strong>Current Date:</strong> {{ editing?.appointmentDate }}</p>
-          <p><strong>Current Time:</strong> {{ editing?.startTime }}</p>
+          <p><strong>Current Date:</strong> {{ formatReadableDate(editing?.appointmentDate) }}</p>
+          <p><strong>Current Time:</strong> {{ editing?.startTime ? formatReadableTime(editing.startTime) : '-' }}</p>
         </div>
         <div class="p-2 rounded-md bg-primary-inverse/50">
-          <p><strong>New Date:</strong> {{ editDate ? editDate.toLocaleDateString() : '-' }}</p>
-          <p><strong>New Time:</strong> {{ editTime ?? '-' }}</p>
+          <p><strong>New Date:</strong> {{ editDate ? formatReadableDate(editDate.toISOString()) : '-' }}</p>
+          <p><strong>New Time:</strong> {{ editTime ? formatReadableTime(editTime) : '-' }}</p>
         </div>
       <Separator />
         <AppointmentDatePicker
