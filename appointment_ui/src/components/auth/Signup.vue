@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref } from "vue"
+import { ref, computed } from "vue"
 import { useAuthStore } from "@/stores/auth.store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   Card,
   CardHeader,
@@ -12,7 +11,7 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card"
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
+import { Eye, EyeOff } from "lucide-vue-next"
 
 const emit = defineEmits<{
   (e: "login"): void
@@ -20,7 +19,6 @@ const emit = defineEmits<{
 }>()
 
 const auth = useAuthStore()
-const errorMessage = ref<string | null>(null)
 
 const firstName = ref("")
 const lastName = ref("")
@@ -28,8 +26,47 @@ const email = ref("")
 const phoneNumber = ref("")
 const nationalId = ref("")
 const password = ref("")
+const showPassword = ref(false)
+
+const digitsOnlyInput = (e: Event) => {
+  const input = e.target as HTMLInputElement
+  input.value = input.value.replace(/\D+/g, "")
+}
+
+const isNameValid = (v: string) => /^[A-Za-z]+$/.test(v)
+
+const isEmailValid = computed(() =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.value)
+)
+
+const isPhoneValid = computed(() =>
+  /^\d{10}$/.test(phoneNumber.value)
+)
+
+const isNationalIdValid = computed(() =>
+  /^\d{9,13}$/.test(nationalId.value)
+)
+
+const hasUppercase = computed(() => /[A-Z]/.test(password.value))
+const hasSpecialChar = computed(() => /[@#$_]/.test(password.value))
+const hasMinLength = computed(() => password.value.length >= 8)
+
+const isPasswordValid = computed(() =>
+  hasUppercase.value && hasSpecialChar.value && hasMinLength.value
+)
+
+const canSubmit = computed(() =>
+  isNameValid(firstName.value) &&
+  isNameValid(lastName.value) &&
+  isEmailValid.value &&
+  isPhoneValid.value &&
+  isNationalIdValid.value &&
+  isPasswordValid.value
+)
 
 const handleSignup = async () => {
+  if (!canSubmit.value) return
+
   const success = await auth.signup({
     firstName: firstName.value,
     lastName: lastName.value,
@@ -39,12 +76,7 @@ const handleSignup = async () => {
     password: password.value,
   })
 
-  if (success) {
-    errorMessage.value = null
-    emit("success")
-  } else {
-    errorMessage.value = "Signup failed. Please check your details."
-  }
+  if (success) emit("success")
 }
 </script>
 
@@ -56,34 +88,114 @@ const handleSignup = async () => {
     </CardHeader>
 
     <CardContent>
-      <Alert v-if="errorMessage" variant="error" class="mb-4">
-        <AlertTitle>Signup failed</AlertTitle>
-        <AlertDescription>{{ errorMessage }}</AlertDescription>
-      </Alert>
-
       <form @submit.prevent="handleSignup" class="space-y-4">
         <div class="grid grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <Label>First name</Label>
-            <Input v-model="firstName" required />
+          <div class="space-y-2">
+            <Input
+              v-model="firstName"
+              placeholder="First name"
+              :class="firstName && !isNameValid(firstName) ? 'border-error' : ''"
+            />
+            <p v-if="firstName && !isNameValid(firstName)" class="text-xs text-error">
+              Letters only
+            </p>
           </div>
-          <div class="space-y-1">
-            <Label>Last name</Label>
-            <Input v-model="lastName" required />
+
+          <div class="space-y-2">
+            <Input
+              v-model="lastName"
+              placeholder="Last name"
+              :class="lastName && !isNameValid(lastName) ? 'border-error' : ''"
+            />
+            <p v-if="lastName && !isNameValid(lastName)" class="text-xs text-error">
+              Letters only
+            </p>
           </div>
         </div>
 
-        <Input v-model="email" type="email" placeholder="Email" />
-        <Input v-model="phoneNumber" placeholder="Phone number" />
-        <Input v-model="nationalId" placeholder="National ID" required />
-        <Input v-model="password" type="password" placeholder="Password" required />
+        <div class="space-y-1">
+          <Input
+            v-model="email"
+            placeholder="Email"
+            :class="email && !isEmailValid ? 'border-error' : ''"
+          />
+          <p v-if="email && !isEmailValid" class="text-xs text-error">
+            Enter a valid email address
+          </p>
+        </div>
 
-        <Button type="submit" class="w-full">Sign up</Button>
+        <div class="space-y-1">
+          <Input
+            v-model="phoneNumber"
+            placeholder="Phone number"
+            maxlength="10"
+            inputmode="numeric"
+            @input="digitsOnlyInput"
+            :class="phoneNumber && !isPhoneValid ? 'border-error' : ''"
+          />
+          <p v-if="phoneNumber && !isPhoneValid" class="text-xs text-error">
+            Must be exactly 10 digits
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <Input
+            v-model="nationalId"
+            placeholder="National ID"
+            maxlength="13"
+            inputmode="numeric"
+            @input="digitsOnlyInput"
+            :class="nationalId && !isNationalIdValid ? 'border-error' : ''"
+          />
+          <p v-if="nationalId && !isNationalIdValid" class="text-xs text-error">
+            Must be 9–13 digits
+          </p>
+        </div>
+
+        <div class="space-y-1">
+          <div class="relative">
+            <Input
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              placeholder="Password"
+            />
+            <button
+              type="button"
+              class="absolute right-3 top-4"
+              @click="showPassword = !showPassword"
+            >
+              <Eye
+                v-if="!showPassword"
+                class="h-5 w-5 text-primary"
+              />
+              <EyeOff
+                v-else
+                class="h-5 w-5 text-primary"
+              />
+            </button>
+          </div>
+
+          <ul class="text-xs mt-2 space-y-1">
+            <li :class="hasUppercase ? 'text-success' : 'text-error'">
+              • One uppercase letter
+            </li>
+            <li :class="hasSpecialChar ? 'text-success' : 'text-error'">
+              • One special character (@ # $ _)
+            </li>
+            <li :class="hasMinLength ? 'text-success' : 'text-error'">
+              • Minimum 8 characters
+            </li>
+          </ul>
+        </div>
+
+        <Button type="submit" class="w-full" :disabled="!canSubmit">
+          Sign up
+        </Button>
       </form>
     </CardContent>
 
-    <CardFooter class="flex justify-center">
-      <Button variant="link" type="button" @click="$emit('login')">
+    <CardFooter class="justify-center">
+      <Button variant="link" @click="$emit('login')">
         Already have an account? Log in
       </Button>
     </CardFooter>
