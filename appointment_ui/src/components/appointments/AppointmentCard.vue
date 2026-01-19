@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle2 } from "lucide-vue-next"
 import { employeesApi } from "@/api/employees.api"
 import { timeSlotsApi, type TimeSlot } from "@/api/timeSlots.api"
 import { appointmentsApi } from "@/api/appointments.api"
+import { branchesApi, type BranchWithHours } from "@/api/branch.api"
 import { useAuthStore } from "@/stores/auth.store"
 import { toLocalDateString } from "@/utils/date"
 
@@ -53,6 +54,7 @@ const unavailableTimes = ref<string[]>([])
 const isDayDisabled = ref(false)
 const pendingPayload = ref<PendingAppointmentPayload | null>(null)
 const isBooking = ref(false)
+const branches = ref<BranchWithHours[]>([])
 
 const clearAlertAfter = (ms = 3000) => {
   setTimeout(() => {
@@ -66,11 +68,13 @@ const ensureDate = (d: string | Date): Date => (d instanceof Date ? d : new Date
 onMounted(async () => {
   try {
     allTimeSlots.value = await timeSlotsApi.getAll()
+    branches.value = await branchesApi.getAll()
   } catch {
     alertMessage.value = "Failed to load time slots."
     clearAlertAfter()
   }
 })
+
 const branchEmployeeIndex = ref<Record<string, number>>({})
 
 watch(
@@ -112,26 +116,65 @@ const availability = await appointmentsApi.getAvailability(branchIdStr, localDat
   { immediate: true }
 )
 
+const getDayOfWeek = (date: Date) =>
+  date.toLocaleDateString("en-US", { weekday: "long" }).toUpperCase()
+
+const timeToMinutes = (time: string) => {
+  const [h, m] = time.split(":").map(Number)
+  return h * 60 + m
+}
+
 const availableTimes = computed(() => {
-  if (!props.selectedDate) return []
+  if (!props.selectedDate || !props.selectedBranchId) return []
+
+  const branch = branches.value.find(
+    b => b.branchId === props.selectedBranchId
+  )
+  if (!branch) return []
+
+  const day = getDayOfWeek(ensureDate(props.selectedDate))
+
+  const hours = branch.businessHours.find(
+    h => h.dayOfWeek.toUpperCase() === day
+  )
+
+  if (!hours) return []
+
+  const openMinutes = timeToMinutes(hours.openTime)
+const slotDuration =
+  allTimeSlots.value.length > 1
+    ? timeToMinutes(allTimeSlots.value[1].startTime) -
+      timeToMinutes(allTimeSlots.value[0].startTime)
+    : 60
+
+const closeMinutes = timeToMinutes(hours.closeTime) - slotDuration
+
 
   const now = new Date()
-  const isToday = toLocalDateString(ensureDate(props.selectedDate)) === toLocalDateString(now)
+  const isToday =
+    toLocalDateString(ensureDate(props.selectedDate)) ===
+    toLocalDateString(now)
 
   return allTimeSlots.value
     .map(t => t.startTime)
     .filter(time => {
+      const minutes = timeToMinutes(time)
+
+      if (minutes < openMinutes || minutes > closeMinutes) return false
+
       if (unavailableTimes.value.includes(time)) return false
-      if (!isToday) return true
 
-      const [hStr, mStr] = time.split(":")
-      if (!hStr || !mStr) return false
+      if (isToday) {
+        const [h, m] = time.split(":").map(Number)
+        const slot = new Date()
+        slot.setHours(h, m, 0, 0)
+        if (slot <= now) return false
+      }
 
-      const slot = new Date()
-      slot.setHours(Number(hStr), Number(mStr), 0, 0)
-      return slot > now
+      return true
     })
 })
+
 
 const refreshAvailability = async () => {
   if (!props.selectedBranchId || !props.selectedDate) return
