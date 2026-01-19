@@ -14,6 +14,17 @@ const emit = defineEmits<{
   (e: "update:modelValue", value: string): void
 }>()
 
+const formatTime = (time: string) => {
+  const [h, m] = time.split(':').map(Number)
+  const d = new Date()
+  d.setHours(h, m, 0, 0)
+  return d.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: m === 0 ? undefined : '2-digit',
+    hour12: true
+  })
+}
+
 const selectTime = (time: string) => {
   if (props.disabled) return
   if (props.unavailableTimes?.includes(time)) return
@@ -37,7 +48,7 @@ const selectTime = (time: string) => {
           unavailableTimes?.includes(time) && 'opacity-40 cursor-not-allowed'
         )"
       >
-        {{ time }}
+        {{ formatTime(time) }}
       </Button>
     </div>
 </template>

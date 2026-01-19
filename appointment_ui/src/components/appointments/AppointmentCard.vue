@@ -197,7 +197,7 @@ selectedEmployee.value = employee.employeeId
 
   try {
     await appointmentsApi.create({ ...payload, clientId: auth.clientId! })
-    successMessage.value = "Appointment booked successfully. Check all booking made in the table below!"
+    successMessage.value = "Appointment booked successfully. Check all appointments booked in the table below!"
     pendingPayload.value = null
     await refreshAvailability()
     emit("appointment-booked")
